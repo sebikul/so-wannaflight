@@ -1,17 +1,22 @@
 
+#ifndef DATABASE_H
+#define DATABASE_H
+
+
 #define FLIGHT_SIZE 32
 
 //TODO alinear los datos a palabra.
 
 typedef char bool;
+typedef NULL (void*)0
 
 typedef unsigned int flight_id;
 typedef unsigned short airport_id;
-typedef int reservation_id;
+typedef int res_id;
 
 typedef struct {
 	int last_flight_id;
-	reservation_id last_reservation;
+	res_id last_reservation;
 } DB_HEADER;
 
 
@@ -26,17 +31,26 @@ typedef struct {
 
 
 typedef struct {
-	int reservation_id;
+	int res_id;
 } DB_SEAT;
 
 
 typedef struct {
-	int count;
+	union{
+		int count;
+		res_id seat;
+		bool result;
+	} data;
+	
 	DB_ENTRY* results;
-} DB_RESUL;
+} DB_DATAGRAM;
 
-reservation_id purchase(flight_id id);
+res_id purchase(flight_id id);
 
 DB_RESULT consult_flights(airport_id origin, airport_id destination);
 
-bool cancel(reservation_id id);
+bool cancel(res_id id);
+
+
+
+#endif

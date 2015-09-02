@@ -1,6 +1,11 @@
 
 
+all: server
+
+server:
+	cd server; make all
 
 clean:
-	cd servidor; make clean
+	cd server; make clean
 	
+.PHONY: all clean
