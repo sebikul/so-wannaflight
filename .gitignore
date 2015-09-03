@@ -1,0 +1,6 @@
+
+server/server
+client/client
+
+client/client.*/*
+server/server.*/*

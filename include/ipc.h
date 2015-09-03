@@ -1,11 +1,11 @@
+#include "database.h"
 
+void ipc_listen();
 
-void listen();
+void ipc_connect();
 
-void connect();
+void ipc_send(DB_DATAGRAM* data);
 
-void send(DB_DATAGRAM* data);
+DB_DATAGRAM* ipc_receive();
 
-DB_DATAGRAM* receive();
-
-void disconnect();
+void ipc_disconnect();

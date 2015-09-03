@@ -5,8 +5,9 @@
 
 
 #define SHMEM_SIZE 	4096
-#define SHMEM_KEY 	"ar.edu.itba.so.wannaflight"
+#define SHMEM_KEY 	(key_t) 0xBEEF1
 
 
+#define SEM_KEY 	(key_t) 0xBEEF2
 
 #endif

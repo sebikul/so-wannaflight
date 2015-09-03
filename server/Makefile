@@ -3,9 +3,11 @@
 
 all: server.o
 
+run: clean server.o
+	./server
+
 server.o:
-	gcc -g -o server server.c
-
-
+	gcc -Wall -g -o server -I../include server.c ../ipc/shmem.c
 clean: 
 	rm -f *.o
+	rm -f server
