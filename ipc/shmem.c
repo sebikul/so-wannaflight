@@ -71,9 +71,13 @@ static void shmem_destroy(){
 	shmdt(shmem.alloc);
 	shmctl(shmem.memid, IPC_RMID, 0);
 
-	//semctl(shmem.semid, 0, IPC_RMID);
+	semctl(shmem.semid, 0, IPC_RMID);
 
 }
+
+// static void sem_destroy(){
+
+// }
 
 static void sem_down(void){
 
@@ -107,11 +111,10 @@ void ipc_listen(){
 
 	printf("Escuchando clientes\n");
 
-	shmem_destroy();
-
 	sem_down(); //Bloquea hasta que un cliente ejecute semup
 
-	
+	shmem_destroy();
+
 }
 
 void ipc_connect(){
