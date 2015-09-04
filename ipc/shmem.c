@@ -24,7 +24,9 @@ typedef struct {
 
 static SHMEM_ALLOC shmem;
 
-
+/*
+	Crea la zona de memoria compartida
+ */
 static void shmem_init(){
 
 	if ( (shmem.memid = shmget(SHMEM_KEY, SHMEM_SIZE, IPC_CREAT|0666)) == -1 ){
@@ -41,6 +43,9 @@ static void shmem_init(){
 
 }
 
+/*
+	Inicializa _n_ semaforos
+ */
 static void sem_init(int n){
 
 	if ( (shmem.semid = semget(SEM_KEY, n, 0)) >= 0 ){
@@ -59,6 +64,9 @@ static void sem_init(int n){
 
 }
 
+/*
+	Setea el valor de los semaforos a _val_
+ */
 static void sem_set(int val){
 
 	//TODO hacer un for por si n>1
@@ -66,6 +74,9 @@ static void sem_set(int val){
 
 }
 
+/*
+	Elimina la zona de memoria compartida.
+ */
 static void shmem_destroy(){
 
 	shmdt(shmem.alloc);
@@ -75,10 +86,9 @@ static void shmem_destroy(){
 
 }
 
-// static void sem_destroy(){
-
-// }
-
+/*
+	Ejecuta down sobre el semaforo
+ */
 static void sem_down(void){
 
 	struct sembuf sb;
@@ -89,6 +99,9 @@ static void sem_down(void){
 	semop(shmem.semid, &sb, 1);
 }
 
+/*
+	Ejecuta un up sobre el semaforo
+ */
 static void sem_up(void){
 
 	struct sembuf sb;
@@ -112,6 +125,7 @@ void ipc_listen(){
 	printf("Escuchando clientes\n");
 
 	sem_down(); //Bloquea hasta que un cliente ejecute semup
+
 
 	shmem_destroy();
 
