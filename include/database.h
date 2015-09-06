@@ -36,10 +36,13 @@ typedef struct __attribute__((packed)){
 	airport_id destination;
 } DB_ENTRY;
 
+typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD} OPCODE;
 
 typedef struct {
 
 	size_t size;
+
+	OPCODE opcode;
 
 	union{
 		int 	_count;
@@ -49,8 +52,8 @@ typedef struct {
 	} _data;
 	
 	union{
-		DB_ENTRY** 	_results;
-		char 		_cmd[1024];
+		DB_ENTRY* 	_results;
+		char 		_cmd;
 	} _raw_data;
 
 } DB_DATAGRAM;
@@ -64,11 +67,11 @@ typedef struct {
 #define dg_results		_raw_data._results
 
 #define DUMP_DBENTRY(entry)			printf("Flight ID: %d\nDeparture: %lld\nOrigin: %d\n Destination: %d",\
-										 entry->id, (long long)entry->departure, entry->origin, entry->destination)
+										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
 
 #define DUMP_DATAGRAM(datagram)		{\
-										printf("Size: %zu\nCount: %d\nSeat: %d\nResult: %s\n",\
-											 datagram->size, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE");\
+										printf("Size: %zu\nopcode: %d\nCount: %d\nSeat: %d\nResult: %s\nCMD: %s\n",\
+											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",&datagram->dg_cmd);\
 									}
 										//for(int __i = 0;__i<datagram->dg_count;__i++){\
 										//	DUMP_DBENTRY(datagram->dg_results[__i]);\

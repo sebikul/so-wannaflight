@@ -13,9 +13,14 @@
 #include "database.h"
 #include "ipc.h"
 
-#define SEM_QUEUE				0
-#define SEM_WAIT_FOR_SERVER 	1
-#define SEM_WAIT_FOR_CLIENT 	2
+#define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(SEM_CLIENT), get_sem_val(SEM_SERVER))
+
+#define SEM_QUEUE	0
+#define SEM_SERVER 	1
+#define SEM_CLIENT 	2
+
+#define WAIT_FOR(sem) 	sem_down(sem)
+#define UNBLOCK(sem)	sem_up(sem)
 
 // TODO
 typedef struct {
@@ -107,6 +112,12 @@ static void shmem_destroy(){
 	//Marcamos la memoria como eliminable
 	shmctl(shmem.memid, IPC_RMID, 0);
 
+
+}
+
+static void sem_destroy(){
+
+
 	//Destruimos los semaforos
 	semctl(shmem.semid, 0, IPC_RMID);
 
@@ -146,7 +157,7 @@ int ipc_send(DB_DATAGRAM* data){
 
 	memcpy(shmem.alloc, data, data->size);
 
-	sem_up(SEM_WAIT_FOR_CLIENT); //Desbloqueamos el servidor
+	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
 
 	return 0;
 	
@@ -161,10 +172,14 @@ DB_DATAGRAM* ipc_receive(){
 
 	memcpy(new_datagram,datagram,datagram->size);
 
-	sem_up(SEM_WAIT_FOR_SERVER); //Desbloqueamos el cliente
+	UNBLOCK(SEM_CLIENT);
 
 	return new_datagram;
 
+}
+
+static int get_sem_val(int semnum ){
+        return(semctl(shmem.semid, semnum, GETVAL));
 }
 
 void ipc_listen(){
@@ -180,15 +195,15 @@ void ipc_listen(){
 	sem_init(3);
 
 	sem_set(SEM_QUEUE, 1);
-	sem_set(SEM_WAIT_FOR_CLIENT, 0);
-	sem_set(SEM_WAIT_FOR_SERVER, 0);
+	sem_set(SEM_CLIENT, 0);
+	sem_set(SEM_SERVER, 0);
 
 	printf("Escuchando clientes...\n");
 
 	//devuelta:
 
 	//STEP-0: Bloquea hasta que un cliente ejecute semup
-	sem_down(SEM_WAIT_FOR_CLIENT); 
+	WAIT_FOR(SEM_CLIENT); 
 
 	printf("Cliente conectado...\n");
 
@@ -201,9 +216,11 @@ void ipc_listen(){
 		case 0: /* hijo */
 
 			//STEP-1			
-			sem_down(SEM_WAIT_FOR_CLIENT); //Esperamos al primer mensaje
+			WAIT_FOR(SEM_CLIENT); //Esperamos al primer mensaje
 
 			DB_DATAGRAM *datagram=(DB_DATAGRAM*)shmem.alloc;
+
+			DUMP_DATAGRAM(datagram);
 
 			if(datagram->dg_shmemkey==-1){
 				printf("Pedido de zona de memoria recibido.\n");
@@ -216,29 +233,39 @@ void ipc_listen(){
 
 			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count); 
 
+			key_t shmemkey = datagram->dg_shmemkey;
+
+			shmem_destroy();
+
+			shmem_init_with_key(shmemkey);
+
 			//STEP-2
-			sem_up(SEM_WAIT_FOR_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
+			UNBLOCK(SEM_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
+
+			printf("Esperando a cliente...\n");
+
+			//STEP-3
+			WAIT_FOR(SEM_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
 
 			printf("Sincronizacion completa. Esperando comandos...\n");
 
-			sem_down(SEM_WAIT_FOR_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
-
-			int n=0;
+			int n = 0;
 			
-			while (n<10){
+			while (1){
+
+				//STEP-4
+				WAIT_FOR(SEM_CLIENT); //Esperamos que mande un comando
 
 				DB_DATAGRAM* dg=(DB_DATAGRAM*)shmem.alloc;
 
 				DUMP_DATAGRAM(dg)
 
-				sem_up(SEM_WAIT_FOR_SERVER); //Desbloqueamos el cliente
-				sem_down(SEM_WAIT_FOR_CLIENT); //Esperamos que mande un comando
-
+				UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
+				
 				n++;
 			}
 
 			printf("Servidor hijo termina\n");
-			shmem_destroy();
 			exit(0);
 			break;
 		
@@ -274,17 +301,18 @@ void ipc_connect(){
 
 	printf("Esperando en la cola...\n");
 
-	sem_down(SEM_QUEUE); //Si entra otro cliente, queda bloqueado en una "cola"
+	WAIT_FOR(SEM_QUEUE); //Si entra otro cliente, queda bloqueado en una "cola"
 
 	printf("Conectado con el servidor...\n");
 
 	// STEP-0: Desbloqueamos el servidor
-	sem_up(SEM_WAIT_FOR_CLIENT);
+	UNBLOCK(SEM_CLIENT);
 
-	datagram = calloc(1, sizeof(DB_DATAGRAM));
+	datagram = (DB_DATAGRAM*) calloc(1, sizeof(DB_DATAGRAM));
 
 	datagram->size = sizeof(DB_DATAGRAM);
 	datagram->dg_shmemkey = -1;
+	datagram->opcode=OP_CMD;
 
 	//STEP-1: UP -> Client
 	ipc_send(datagram);
@@ -293,8 +321,11 @@ void ipc_connect(){
 	printf("Pedido de zona de memoria enviado.\n");
 
 	//STEP-2
-	sem_down(SEM_WAIT_FOR_SERVER);//Esperamos que el servidor llene la shmemkey
+	WAIT_FOR(SEM_SERVER);//Esperamos que el servidor llene la shmemkey
 	
+	printf("Recibiendo zona de memoria...\n");
+
+	//STEP-3 Up -> Client
 	datagram = ipc_receive();
 
 	shmem_destroy();
@@ -302,22 +333,27 @@ void ipc_connect(){
 	shmem_init_with_key(datagram->dg_shmemkey);
 
 	free(datagram);
+	
+	while ( (n = read(0, buffer, SHMEM_SIZE)) > 0 ){
 
-	//sem_up(SEM_WAIT_FOR_CLIENT);
+		int size = sizeof(DB_DATAGRAM) + n;
 
-	while ( (n = read(0, buffer, SHMEM_SIZE)) > 0 ){	
+		datagram = (DB_DATAGRAM*) calloc(1, size);
 
-		printf("Enviando comando: %s\n", buffer);
+		datagram->size = size;
+		datagram->opcode=OP_CMD;
+		strcpy(&datagram->dg_cmd, buffer);
+		(&datagram->dg_cmd)[n] = 0;
 
-		datagram = calloc(1,sizeof(DB_DATAGRAM));
+		printf("Enviando comando: %s", &datagram->dg_cmd);
 
-		memcpy(datagram->dg_cmd, buffer, n*sizeof(char));
+		DUMP_DATAGRAM(datagram);
 
-		//STEP-3 Up -> Client
+		//STEP-4 Up -> Client
 		ipc_send(datagram);
 
-		//sem_up(SEM_WAIT_FOR_CLIENT); //Desbloqueamos el servidor
-		sem_down(SEM_WAIT_FOR_SERVER);  // Esperamos un mensaje
+		//UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
+		WAIT_FOR(SEM_SERVER);  // Esperamos un mensaje
 
 		free(datagram);
 	}
@@ -326,7 +362,7 @@ void ipc_connect(){
 
 	free(datagram);
 
-	sem_up(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
+	UNBLOCK(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
 
 	shmem_detach();
 
@@ -336,6 +372,7 @@ void ipc_connect(){
 
 void ipc_disconnect(){
 
-	
+	shmem_destroy();
+	sem_destroy();
 
 }
