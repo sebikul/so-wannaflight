@@ -41,6 +41,8 @@ typedef struct {
 
 static SHMEM_ALLOC shmem;
 
+#define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\n]\n\n", shmem.semid, shmem.queueid, shmem.memid);
+
 static int cli_count = 0;
 
 
@@ -292,13 +294,14 @@ void ipc_accept(){
 
 			//shmem.alloc tiene el pedido de una zona de memoria. 
 
-			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count); 
+			DUMP_SHMEM_DATA();
+			PRINT_SEM_VALUES;
+
+			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count+1); 
 
 			int oldsemid = shmem.semid;
 
 			key_t shmemkey = datagram->dg_shmemkey;
-
-			shmem_destroy();
 
 			shmem_init_with_key(shmemkey);
 			sem_init_with_key(shmemkey);
@@ -306,12 +309,13 @@ void ipc_accept(){
 			//Reseteamos los nuevos semaforos 
 			sem_reset();
 
+			DUMP_SHMEM_DATA()
+			PRINT_SEM_VALUES;
 
 			//STEP-2
 			//UNBLOCK(SEM_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
 			sem_up(oldsemid,SEM_SERVER);
 
-			PRINT_SEM_VALUES;
 
 			//STEP-3
 			//WAIT_FOR(SEM_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
@@ -332,7 +336,7 @@ void ipc_accept(){
 
 
 			//ACA ROMPE
-			sleep(1000);
+			sleep(1);
 
 			//TODO Incrementar el contador para generar claves unicas.
 
@@ -383,6 +387,8 @@ void ipc_connect(){
 
 	//STEP-3 Up -> Client
 	datagram = ipc_receive();
+
+	DUMP_DATAGRAM(datagram);
 
 	shmem_destroy();
 
