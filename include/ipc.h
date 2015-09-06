@@ -4,7 +4,7 @@ void ipc_listen();
 
 void ipc_connect();
 
-void ipc_send(DB_DATAGRAM* data);
+int ipc_send(DB_DATAGRAM* data);
 
 DB_DATAGRAM* ipc_receive();
 

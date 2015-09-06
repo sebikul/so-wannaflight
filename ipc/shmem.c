@@ -30,13 +30,12 @@ typedef struct {
 
 static SHMEM_ALLOC shmem;
 
+static int cli_count = 0;
 
-/*
-	Crea la zona de memoria compartida
- */
-static void shmem_init(){
 
-	if ( (shmem.memid = shmget(SHMEM_KEY, SHMEM_SIZE, IPC_CREAT|0666)) == -1 ){
+static void shmem_init_with_key(key_t shmemkey){
+
+	if ( (shmem.memid = shmget(shmemkey, SHMEM_SIZE, IPC_CREAT|0666)) == -1 ){
 		printf("shmget failed.\n");
 		exit(1);
 	}
@@ -51,15 +50,29 @@ static void shmem_init(){
 }
 
 /*
+	Crea la zona de memoria compartida
+ */
+static void shmem_init(){
+
+	key_t shmemkey=ftok("../database.sqlite",cli_count);
+
+	shmem_init_with_key(shmemkey);
+
+}
+
+/*
 	Inicializa _n_ semaforos
  */
 static void sem_init(int n){
 
-	if ( (shmem.semid = semget(SEM_KEY, n, 0)) >= 0 ){
+	//El id solo usa los 8 bits menos significativos. Seteamos a FF que es la cant maxima de clientes -1 que puede aguantar el servidor
+	key_t semkey=ftok("../database.sqlite", 0xFF); 
+	
+	if ( (shmem.semid = semget(semkey, n, 0)) >= 0 ){
 		return;
 	}
 		
-	if ( (shmem.semid = semget(SEM_KEY, n, IPC_CREAT|0666)) == -1 ){
+	if ( (shmem.semid = semget(semkey, n, IPC_CREAT|0666)) == -1 ){
 		printf("shmget failed.\n");
 		exit(1);
 	}
@@ -125,9 +138,38 @@ static void sem_up(int semnum){
 	semop(shmem.semid, &sb, 1);
 }
 
+int ipc_send(DB_DATAGRAM* data){
+
+	if(data->size > SHMEM_SIZE){
+		return -1;
+	}
+
+	memcpy(shmem.alloc, data, data->size);
+
+	sem_up(SEM_WAIT_FOR_CLIENT); //Desbloqueamos el servidor
+
+	return 0;
+	
+}
+
+DB_DATAGRAM* ipc_receive(){
+
+	DB_DATAGRAM *datagram, *new_datagram;
+
+	datagram = (DB_DATAGRAM*)shmem.alloc;
+	new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
+
+	memcpy(new_datagram,datagram,datagram->size);
+
+	sem_up(SEM_WAIT_FOR_SERVER); //Desbloqueamos el cliente
+
+	return new_datagram;
+
+}
+
 void ipc_listen(){
 
-	int pid,i=0;
+	int pid;
 
 	//TODO: Obtener un key unico
 
@@ -145,7 +187,8 @@ void ipc_listen(){
 
 	//devuelta:
 
-	sem_down(SEM_WAIT_FOR_CLIENT); //Bloquea hasta que un cliente ejecute semup
+	//STEP-0: Bloquea hasta que un cliente ejecute semup
+	sem_down(SEM_WAIT_FOR_CLIENT); 
 
 	printf("Cliente conectado...\n");
 
@@ -156,31 +199,53 @@ void ipc_listen(){
 			break;
 
 		case 0: /* hijo */
-			
+
+			//STEP-1			
 			sem_down(SEM_WAIT_FOR_CLIENT); //Esperamos al primer mensaje
 
-			while (1){
+			DB_DATAGRAM *datagram=(DB_DATAGRAM*)shmem.alloc;
 
-				printf("Esperando a cliente...\n");
-				// sem_up(SEM_WAIT_FOR_CLIENT); 
-				
+			if(datagram->dg_shmemkey==-1){
+				printf("Pedido de zona de memoria recibido.\n");
+			}else{
+				printf("Error en el protocolo de sincronizacion.\n");
+				exit(1);
+			}
 
-				printf("Servidor hijo lee: %s", shmem.alloc);
-				if ( memcmp(shmem.alloc, "end", 3) == 0 ){
-					break;
-				}
+			//shmem.alloc tiene el pedido de una zona de memoria. 
+
+			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count); 
+
+			//STEP-2
+			sem_up(SEM_WAIT_FOR_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
+
+			printf("Sincronizacion completa. Esperando comandos...\n");
+
+			sem_down(SEM_WAIT_FOR_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
+
+			int n=0;
+			
+			while (n<10){
+
+				DB_DATAGRAM* dg=(DB_DATAGRAM*)shmem.alloc;
+
+				DUMP_DATAGRAM(dg)
 
 				sem_up(SEM_WAIT_FOR_SERVER); //Desbloqueamos el cliente
 				sem_down(SEM_WAIT_FOR_CLIENT); //Esperamos que mande un comando
 
-				i++;
+				n++;
 			}
 
 			printf("Servidor hijo termina\n");
+			shmem_destroy();
+			exit(0);
 			break;
 		
 		default: /* padre */
 			
+			cli_count++;
+
 			sleep(100000);
 
 			//TODO Incrementar el contador para generar claves unicas, GOTO devuelta.
@@ -192,15 +257,16 @@ void ipc_listen(){
 	//Hijo inicia comunicacion
 	//Padre vuelve a ejecutar listen con el key incrementado
 
-	shmem_destroy();
-
 }
 
 void ipc_connect(){
 
+	char buffer[64];
 	int n;
 
-	printf("Connecting to server...\n");
+	DB_DATAGRAM *datagram;
+
+	printf("Conectando con el servidor...\n");
 
 	shmem_init();
 
@@ -212,24 +278,64 @@ void ipc_connect(){
 
 	printf("Conectado con el servidor...\n");
 
-	sem_up(SEM_WAIT_FOR_CLIENT);//Desbloqueamos el servidor
+	// STEP-0: Desbloqueamos el servidor
+	sem_up(SEM_WAIT_FOR_CLIENT);
 
-	//sem_down(SEM_WAIT_FOR_SERVER); //Quedamos a la espera de mesajes
+	datagram = calloc(1, sizeof(DB_DATAGRAM));
 
-	while ( (n = read(0, shmem.alloc, SHMEM_SIZE)) > 0 ){
+	datagram->size = sizeof(DB_DATAGRAM);
+	datagram->dg_shmemkey = -1;
 
-				//sem_down(SEM_WAIT_FOR_SERVER);
+	//STEP-1: UP -> Client
+	ipc_send(datagram);
+	free(datagram);
 
-				printf("Cliente escribe: %.*s", n, shmem.alloc);
+	printf("Pedido de zona de memoria enviado.\n");
 
-				sem_up(SEM_WAIT_FOR_CLIENT); //Desbloqueamos el servidor
-				sem_down(SEM_WAIT_FOR_SERVER);  // Esperamos un mensaje
+	//STEP-2
+	sem_down(SEM_WAIT_FOR_SERVER);//Esperamos que el servidor llene la shmemkey
+	
+	datagram = ipc_receive();
+
+	shmem_destroy();
+
+	shmem_init_with_key(datagram->dg_shmemkey);
+
+	free(datagram);
+
+	//sem_up(SEM_WAIT_FOR_CLIENT);
+
+	while ( (n = read(0, buffer, SHMEM_SIZE)) > 0 ){	
+
+		printf("Enviando comando: %s\n", buffer);
+
+		datagram = calloc(1,sizeof(DB_DATAGRAM));
+
+		memcpy(datagram->dg_cmd, buffer, n*sizeof(char));
+
+		//STEP-3 Up -> Client
+		ipc_send(datagram);
+
+		//sem_up(SEM_WAIT_FOR_CLIENT); //Desbloqueamos el servidor
+		sem_down(SEM_WAIT_FOR_SERVER);  // Esperamos un mensaje
+
+		free(datagram);
 	}
 
 	//Aca el servidor ya escribio la clave de la zona de memoria que hay que mapear
 
+	free(datagram);
+
 	sem_up(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
 
 	shmem_detach();
+
+}
+
+
+
+void ipc_disconnect(){
+
+	
 
 }

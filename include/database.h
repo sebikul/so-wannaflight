@@ -32,20 +32,48 @@ typedef struct __attribute__((packed)){
 	time_t departure;
 	DB_SEAT seats[FLIGHT_SIZE];
 	bool is_empty;
-	airport_id destination;
 	airport_id origin;
+	airport_id destination;
 } DB_ENTRY;
 
 
 typedef struct {
+
+	size_t size;
+
 	union{
-		int count;
-		res_id seat;
-		bool result;
-	} data;
+		int 	_count;
+		res_id  _seat;
+		bool 	_result;
+		int 	_shmemkey;
+	} _data;
 	
-	DB_ENTRY* results;
+	union{
+		DB_ENTRY** 	_results;
+		char 		_cmd[1024];
+	} _raw_data;
+
 } DB_DATAGRAM;
+
+#define dg_count 		_data._count 
+#define dg_seat 		_data._seat 
+#define dg_result 		_data._result 
+#define dg_shmemkey 	_data._shmemkey
+
+#define dg_cmd			_raw_data._cmd
+#define dg_results		_raw_data._results
+
+#define DUMP_DBENTRY(entry)			printf("Flight ID: %d\nDeparture: %lld\nOrigin: %d\n Destination: %d",\
+										 entry->id, (long long)entry->departure, entry->origin, entry->destination)
+
+#define DUMP_DATAGRAM(datagram)		{\
+										printf("Size: %zu\nCount: %d\nSeat: %d\nResult: %s\n",\
+											 datagram->size, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE");\
+									}
+										//for(int __i = 0;__i<datagram->dg_count;__i++){\
+										//	DUMP_DBENTRY(datagram->dg_results[__i]);\
+										//}\
+									//}
 
 res_id purchase(flight_id id);
 
