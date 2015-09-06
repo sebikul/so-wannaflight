@@ -27,6 +27,15 @@ int main(int argc, char** argv){
 
 	ipc_listen();
 
+	while(1){
+		ipc_accept();
+
+		printf("Cliente aceptado. Esperando mas clientes...\n");
+
+	}
+
+	
+
 		// while((c=getchar())!='\n' &&  read<BUFFER_SIZE){
 		// 		buffer[read++]=c;
 		// }

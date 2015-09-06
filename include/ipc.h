@@ -2,6 +2,8 @@
 
 void ipc_listen();
 
+void ipc_accept();
+
 void ipc_connect();
 
 int ipc_send(DB_DATAGRAM* data);
