@@ -41,7 +41,7 @@ typedef struct {
 
 static SHMEM_ALLOC shmem;
 
-#define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\n]\n\n", shmem.semid, shmem.queueid, shmem.memid);
+#define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\nalloc: %p\n]\n\n", shmem.semid, shmem.queueid, shmem.memid,shmem.alloc);
 
 static int cli_count = 0;
 
@@ -67,7 +67,7 @@ static void shmem_init_with_key(key_t shmemkey){
  */
 static void shmem_init(){
 
-	key_t shmemkey=ftok("../database.sqlite",cli_count);
+	key_t shmemkey = ftok("../database.sqlite", 0);
 
 	shmem_init_with_key(shmemkey);
 
@@ -95,7 +95,7 @@ static void sem_init_with_key(key_t semkey){
  */
 static void sem_init(){
 
-	key_t semkey=ftok("../database.sqlite", cli_count); 
+	key_t semkey = ftok("../database.sqlite", 0); 
 	
 	sem_init_with_key(semkey);
 
@@ -278,6 +278,8 @@ void ipc_accept(){
 
 		case 0: /* hijo */
 
+			cli_count++;
+
 			SERVPRINTE("Fork creado, esperando pedido de memoria.\n");
 
 			//STEP-1			
@@ -289,19 +291,21 @@ void ipc_accept(){
 				SERVPRINTE("Pedido de zona de memoria recibido.\n");
 			}else{
 				SERVPRINTE("Error en el protocolo de sincronizacion.\n");
+				DUMP_DATAGRAM(datagram);
 				exit(1);
 			}
 
 			//shmem.alloc tiene el pedido de una zona de memoria. 
 
 			DUMP_SHMEM_DATA();
-			PRINT_SEM_VALUES;
 
-			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count+1); 
+			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count); 
 
 			int oldsemid = shmem.semid;
 
 			key_t shmemkey = datagram->dg_shmemkey;
+
+			shmem_detach();
 
 			shmem_init_with_key(shmemkey);
 			sem_init_with_key(shmemkey);
@@ -310,7 +314,8 @@ void ipc_accept(){
 			sem_reset();
 
 			DUMP_SHMEM_DATA()
-			PRINT_SEM_VALUES;
+
+			SERVPRINTE("Enviando id de zona de memoria.\n");
 
 			//STEP-2
 			//UNBLOCK(SEM_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
@@ -334,8 +339,6 @@ void ipc_accept(){
 			
 			cli_count++;
 
-
-			//ACA ROMPE
 			sleep(1);
 
 			//TODO Incrementar el contador para generar claves unicas.
@@ -374,6 +377,8 @@ void ipc_connect(){
 	datagram->dg_shmemkey = -1;
 	datagram->opcode = OP_CMD;
 
+	DUMP_DATAGRAM(datagram);
+
 	//STEP-1: UP -> Client
 	ipc_send(datagram);
 	free(datagram);
@@ -383,17 +388,19 @@ void ipc_connect(){
 	//STEP-2
 	WAIT_FOR(SEM_SERVER);//Esperamos que el servidor llene la shmemkey
 	
+	DUMP_SHMEM_DATA();
+
 	printf("Recibiendo zona de memoria...\n");
 
 	//STEP-3 Up -> Client
 	datagram = ipc_receive();
 
-	DUMP_DATAGRAM(datagram);
-
-	shmem_destroy();
+	shmem_detach();
 
 	shmem_init_with_key(datagram->dg_shmemkey);
 	sem_init_with_key(datagram->dg_shmemkey);
+
+	DUMP_SHMEM_DATA();
 
 	free(datagram);
 
