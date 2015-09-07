@@ -15,17 +15,17 @@
 
 #define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(shmem.semid, SEM_CLIENT), get_sem_val(shmem.semid, SEM_SERVER))
 
-#define SEM_QUEUE		0
-#define SEM_SRV_QUEUE	1
+#define SEM_QUEUE			0
+#define SEM_SRV_QUEUE		1
 
-#define SEM_SERVER 	0
-#define SEM_CLIENT 	1
+#define SEM_SERVER 			0
+#define SEM_CLIENT 			1
 
-#define WAIT_FOR(sem) 	sem_down(shmem.semid, sem)
-#define UNBLOCK(sem)	sem_up(shmem.semid, sem)
+#define WAIT_FOR(sem) 		sem_down(shmem.semid, sem)
+#define UNBLOCK(sem)		sem_up(shmem.semid, sem)
 
 #define WAIT_FOR_QUEUE(sem) sem_down(shmem.queueid, sem)
-#define UNBLOCK_QUEUE(sem) sem_up(shmem.queueid, sem)
+#define UNBLOCK_QUEUE(sem) 	sem_up(shmem.queueid, sem)
 
 #define CLIPRINTE(msg) 		printf("[CLIENT #%d] " msg, cli_count)
 #define CLIPRINT(msg, ...) 	printf("[CLIENT #%d] " msg, cli_count, __VA_ARGS__)
@@ -276,7 +276,7 @@ void ipc_accept(){
 
 	cli_count++;
 
-	switch ( pid = fork() ){
+	switch (pid = fork()){
 		case -1:
 			SRVPRINT("fork failed.\n");
 			exit(1);
@@ -352,7 +352,7 @@ void ipc_accept(){
 
 void ipc_connect(){
 
-	char buffer[64];
+	char buffer[SHMEM_SIZE] = {0};
 	int n;
 
 	DB_DATAGRAM *datagram;
@@ -379,7 +379,7 @@ void ipc_connect(){
 	datagram->dg_shmemkey = -1;
 	datagram->opcode = OP_CMD;
 
-	DUMP_DATAGRAM(datagram);
+	//DUMP_DATAGRAM(datagram);
 
 	//STEP-1: UP -> Client
 	ipc_send(datagram);

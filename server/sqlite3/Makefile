@@ -1,8 +1,8 @@
 .PHONY: all clean
 
-all: sqlite3
+all: sqlite3.o
 
-sqlite3:
+sqlite3.o:
 	gcc -c sqlite3.c
 
 clean: 

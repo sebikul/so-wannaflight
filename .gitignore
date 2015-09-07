@@ -1,8 +1,10 @@
 
-server/server
-client/client
+server/server-*
+client/client-*
 
+client/client-*.*/*
 client/client.*/*
-server/server.*/*
+
+server/server-*.*/*
 
 *.o
