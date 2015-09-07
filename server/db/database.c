@@ -1,6 +1,11 @@
 
 #include "database.h"
+#include "sqlite3/sqlite3.h"
 
+
+void init_database(){
+	
+}
 
 res_id purchase(flight_id id){
 
