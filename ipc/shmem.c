@@ -235,7 +235,7 @@ static void shmem_serve(){
 
 		DB_DATAGRAM* dg=(DB_DATAGRAM*)shmem.alloc;
 
-		CLIPRINT("Mensaje recibido: %s", &dg->dg_cmd);
+		CLIPRINT("Mensaje recibido: %s", dg->dg_cmd);
 
 		//DUMP_DATAGRAM(dg)
 
@@ -418,10 +418,10 @@ void ipc_connect(){
 
 		datagram->size = size;
 		datagram->opcode=OP_CMD;
-		strcpy(&datagram->dg_cmd, buffer);
-		(&datagram->dg_cmd)[n] = 0;
+		strcpy(datagram->dg_cmd, buffer);
+		datagram->dg_cmd[n] = 0;
 
-		printf("Enviando comando: %s", &datagram->dg_cmd);
+		printf("Enviando comando: %s", datagram->dg_cmd);
 
 		//DUMP_DATAGRAM(datagram);
 

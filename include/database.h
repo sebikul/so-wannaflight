@@ -53,7 +53,7 @@ typedef struct {
 	
 	union{
 		DB_ENTRY* 	_results;
-		char 		_cmd;
+		char 		_cmd[1];
 	} _raw_data;
 
 } DB_DATAGRAM;
@@ -71,7 +71,7 @@ typedef struct {
 
 #define DUMP_DATAGRAM(datagram)		{\
 										printf("Size: %zu\nopcode: %d\nCount: %d\nSeat: %d\nResult: %s\nCMD: %s\n",\
-											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",&datagram->dg_cmd);\
+											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",datagram->dg_cmd);\
 									}
 										//for(int __i = 0;__i<datagram->dg_count;__i++){\
 										//	DUMP_DBENTRY(datagram->dg_results[__i]);\
