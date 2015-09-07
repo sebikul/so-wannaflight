@@ -15,20 +15,22 @@
 
 #define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(shmem.semid, SEM_CLIENT), get_sem_val(shmem.semid, SEM_SERVER))
 
-#define SEM_QUEUE	0
+#define SEM_QUEUE		0
+#define SEM_SRV_QUEUE	1
+
 #define SEM_SERVER 	0
 #define SEM_CLIENT 	1
 
 #define WAIT_FOR(sem) 	sem_down(shmem.semid, sem)
 #define UNBLOCK(sem)	sem_up(shmem.semid, sem)
 
-#define WAIT_FOR_QUEUE() sem_down(shmem.queueid, SEM_QUEUE)
-#define UNBLOCK_QUEUE() sem_up(shmem.queueid, SEM_QUEUE)
+#define WAIT_FOR_QUEUE(sem) sem_down(shmem.queueid, sem)
+#define UNBLOCK_QUEUE(sem) sem_up(shmem.queueid, sem)
 
-#define SERVPRINTE(msg) 		printf("[SERVER #%d] " msg, cli_count)
-#define SERVPRINT(msg, ...) 	printf("[SERVER #%d] " msg, cli_count, __VA_ARGS__)
+#define CLIPRINTE(msg) 		printf("[CLIENT #%d] " msg, cli_count)
+#define CLIPRINT(msg, ...) 	printf("[CLIENT #%d] " msg, cli_count, __VA_ARGS__)
+#define SRVPRINT(msg) 		printf("[SERVER] " msg)
 
-// TODO
 typedef struct {
 
 	int semid;
@@ -107,17 +109,17 @@ static void sem_queue_init(){
 	key_t queuekey=ftok("../database.sqlite", 0xFF); 
 
 	//Creamos el semaforo para la cola de clientes
-	if ((shmem.queueid = semget(queuekey, 1, 0)) >= 0 ){
+	if ((shmem.queueid = semget(queuekey, 2, 0)) >= 0 ){
 		printf("Queue semaphore already exist with id: %d\n", shmem.queueid);
 		return;
 	}
 		
-	if ((shmem.queueid = semget(queuekey, 1, IPC_CREAT|0666)) == -1 ){
+	if ((shmem.queueid = semget(queuekey, 2, IPC_CREAT|0666)) == -1 ){
 		printf("shmget queue failed.\n");
 		exit(1);
 	}
 
-	printf("Initialized queue semaphore with id %d\n", shmem.queueid);
+	printf("Initialized queue semaphores with id %d\n", shmem.queueid);
 
 
 }
@@ -198,6 +200,7 @@ int ipc_send(DB_DATAGRAM* data){
 
 	memcpy(shmem.alloc, data, data->size);
 
+	//STEP-1
 	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
 
 	return 0;
@@ -232,7 +235,7 @@ static void shmem_serve(){
 
 		DB_DATAGRAM* dg=(DB_DATAGRAM*)shmem.alloc;
 
-		SERVPRINT("Mensaje recibido: %s", &dg->dg_cmd);
+		CLIPRINT("Mensaje recibido: %s", &dg->dg_cmd);
 
 		//DUMP_DATAGRAM(dg)
 
@@ -244,7 +247,7 @@ static void shmem_serve(){
 
 void ipc_listen(){
 
-	printf("Inicializando IPC de shared memory...\n");
+	SRVPRINT("Inicializando IPC de shared memory...\n");
 
 	shmem_init();
 
@@ -253,8 +256,9 @@ void ipc_listen(){
 
 	//Inicializamos el valor del semaforo de la cola.
 	sem_set(shmem.queueid, SEM_QUEUE, 1);
+	sem_set(shmem.queueid, SEM_SRV_QUEUE, 0);
 
-	printf("Escuchando clientes...\n");	
+	SRVPRINT("Escuchando clientes...\n");	
 
 }
 
@@ -268,19 +272,19 @@ void ipc_accept(){
 	//STEP-0: Bloquea hasta que un cliente ejecute semup
 	WAIT_FOR(SEM_CLIENT); 
 
-	printf("Cliente conectado...\n");
+	SRVPRINT("Cliente conectado...\n");
+
+	cli_count++;
 
 	switch ( pid = fork() ){
 		case -1:
-			printf("fork failed.\n");
+			SRVPRINT("fork failed.\n");
 			exit(1);
 			break;
 
 		case 0: /* hijo */
 
-			cli_count++;
-
-			SERVPRINTE("Fork creado, esperando pedido de memoria.\n");
+			CLIPRINTE("Fork creado, esperando pedido de memoria.\n");
 
 			//STEP-1			
 			WAIT_FOR(SEM_CLIENT); //Esperamos al primer mensaje
@@ -288,16 +292,16 @@ void ipc_accept(){
 			DB_DATAGRAM *datagram=(DB_DATAGRAM*)shmem.alloc;
 
 			if(datagram->dg_shmemkey==-1){
-				SERVPRINTE("Pedido de zona de memoria recibido.\n");
+				CLIPRINTE("Pedido de zona de memoria recibido.\n");
 			}else{
-				SERVPRINTE("Error en el protocolo de sincronizacion.\n");
+				CLIPRINTE("Error en el protocolo de sincronizacion.\n");
 				DUMP_DATAGRAM(datagram);
 				exit(1);
 			}
 
 			//shmem.alloc tiene el pedido de una zona de memoria. 
 
-			DUMP_SHMEM_DATA();
+			//DUMP_SHMEM_DATA();
 
 			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count); 
 
@@ -313,9 +317,9 @@ void ipc_accept(){
 			//Reseteamos los nuevos semaforos 
 			sem_reset();
 
-			DUMP_SHMEM_DATA()
+			//DUMP_SHMEM_DATA()
 
-			SERVPRINTE("Enviando id de zona de memoria.\n");
+			CLIPRINTE("Enviando id de zona de memoria.\n");
 
 			//STEP-2
 			//UNBLOCK(SEM_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
@@ -326,22 +330,20 @@ void ipc_accept(){
 			//WAIT_FOR(SEM_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
 			sem_down(oldsemid,SEM_CLIENT);
 
+			CLIPRINTE("Sincronizacion completa. Esperando comandos...\n");
 
-			SERVPRINTE("Sincronizacion completa. Esperando comandos...\n");
+
+			UNBLOCK_QUEUE(SEM_SRV_QUEUE);
 
 			shmem_serve();
 
-			printf("Servidor hijo termina\n");
+			SRVPRINT("Servidor hijo termina\n");
 			exit(0);
 			break;
 		
 		default: /* padre */
-			
-			cli_count++;
 
-			sleep(1);
-
-			//TODO Incrementar el contador para generar claves unicas.
+			WAIT_FOR_QUEUE(SEM_SRV_QUEUE);
 
 			break;
 	}
@@ -364,7 +366,7 @@ void ipc_connect(){
 
 	printf("Esperando en la cola...\n");
 
-	WAIT_FOR_QUEUE(); //Si entra otro cliente, queda bloqueado en una "cola"
+	WAIT_FOR_QUEUE(SEM_QUEUE); //Si entra otro cliente, queda bloqueado en una "cola"
 
 	printf("Conectado con el servidor...\n");
 
@@ -388,7 +390,7 @@ void ipc_connect(){
 	//STEP-2
 	WAIT_FOR(SEM_SERVER);//Esperamos que el servidor llene la shmemkey
 	
-	DUMP_SHMEM_DATA();
+	//DUMP_SHMEM_DATA();
 
 	printf("Recibiendo zona de memoria...\n");
 
@@ -400,11 +402,11 @@ void ipc_connect(){
 	shmem_init_with_key(datagram->dg_shmemkey);
 	sem_init_with_key(datagram->dg_shmemkey);
 
-	DUMP_SHMEM_DATA();
+	//DUMP_SHMEM_DATA();
 
 	free(datagram);
 
-	UNBLOCK_QUEUE(); //Cuando terminamos de crear la conexion, se libera el servidor
+	UNBLOCK_QUEUE(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
 	
 	printf("Listo para enviar comandos...\n");
 
