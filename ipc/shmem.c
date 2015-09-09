@@ -60,6 +60,8 @@ static void shmem_init_with_key(key_t shmemkey){
 		exit(1);
 	}
 
+	memset(shmem.alloc, 0, SHMEM_SIZE);
+
 	printf("Initialized shared memory zone with id %d\n", shmem.memid);
 
 }
@@ -200,7 +202,6 @@ int ipc_send(DB_DATAGRAM* data){
 
 	memcpy(shmem.alloc, data, data->size);
 
-	//STEP-1
 	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
 
 	return 0;
@@ -380,17 +381,14 @@ int ipc_connect(int argc, char** args){
 	// STEP-0: Desbloqueamos el servidor
 	UNBLOCK(SEM_CLIENT);
 
-	datagram = (DB_DATAGRAM*) calloc(1, sizeof(DB_DATAGRAM));
+	datagram = (DB_DATAGRAM*) shmem.alloc;
 
 	datagram->size = sizeof(DB_DATAGRAM);
 	datagram->dg_shmemkey = -1;
 	datagram->opcode = OP_CMD;
 
-	//DUMP_DATAGRAM(datagram);
-
-	//STEP-1: UP -> Client
-	ipc_send(datagram);
-	free(datagram);
+	//STEP-1
+	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
 
 	printf("Pedido de zona de memoria enviado.\n");
 
@@ -401,17 +399,17 @@ int ipc_connect(int argc, char** args){
 
 	printf("Recibiendo zona de memoria...\n");
 
-	//STEP-3 Up -> Client
-	datagram = ipc_receive();
+	//STEP-3
+	UNBLOCK(SEM_CLIENT);
+
+	key_t shmemkey = datagram->dg_shmemkey;
 
 	shmem_detach();
 
-	shmem_init_with_key(datagram->dg_shmemkey);
-	sem_init_with_key(datagram->dg_shmemkey);
+	shmem_init_with_key(shmemkey);
+	sem_init_with_key(shmemkey);
 
 	//DUMP_SHMEM_DATA();
-
-	free(datagram);
 
 	UNBLOCK_QUEUE(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
 	
@@ -430,13 +428,10 @@ int ipc_connect(int argc, char** args){
 
 		printf("Enviando comando: %s", datagram->dg_cmd);
 
-		//DUMP_DATAGRAM(datagram);
-
 		//STEP-4 Up -> Client
 		ipc_send(datagram);
 
-		//UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
-		WAIT_FOR(SEM_SERVER);  // Esperamos un mensaje
+		WAIT_FOR(SEM_SERVER); // Esperamos un mensaje
 
 		free(datagram);
 	}
