@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
-#include <unistd.h>
 #include <string.h>
-
+#include <unistd.h>
 
 #include "config.h"
 #include "database.h"
@@ -43,9 +41,7 @@ static SHMEM_ALLOC shmem;
 #define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\nalloc: %p\n]\n\n", shmem.semid, shmem.queueid, shmem.memid,shmem.alloc);
 
 #ifdef SERVER
-
 extern int cli_count;
-
 #endif
 
 static void shmem_init_with_key(key_t shmemkey){
@@ -135,15 +131,20 @@ static void sem_set(int semid, int semnum, int val){
 
 }
 
+static void shmem_detach(){
+
+	printf("Detaching shared memory zone...\n");
+
+	shmdt(shmem.alloc);
+
+}
+
+#ifdef SERVER
 static void sem_reset(){
 
 	sem_set(shmem.semid, SEM_CLIENT, 0);
 	sem_set(shmem.semid, SEM_SERVER, 0);
 
-}
-
-static void shmem_detach(){
-	shmdt(shmem.alloc);
 }
 
 /*
@@ -153,14 +154,16 @@ static void shmem_destroy(){
 
 	shmem_detach();
 
+	CLIPRINTE("Destroying shared memory zone...\n");
+
 	//Marcamos la memoria como eliminable
 	shmctl(shmem.memid, IPC_RMID, 0);
-
 
 }
 
 static void sem_destroy(){
 
+	CLIPRINTE("Destroying semaphores...\n");
 
 	//Destruimos los semaforos
 	semctl(shmem.semid, 0, IPC_RMID);
@@ -168,6 +171,7 @@ static void sem_destroy(){
 
 }
 
+#endif
 /*
 	Ejecuta down sobre el semaforo
  */
@@ -194,6 +198,57 @@ static void sem_up(int semid, int semnum){
 	semop(semid, &sb, 1);
 }
 
+static int get_sem_val(int semid, int semnum ){
+        return(semctl(semid, semnum, GETVAL));
+}
+
+
+#ifdef SERVER
+/*
+	---------------------------------------------------
+	Capa de comunicacion para el SERVIDOR
+
+	---------------------------------------------------
+ */
+DB_DATAGRAM* ipc_receive(){
+
+	WAIT_FOR(SEM_CLIENT); //Esperamos que mande un comando
+
+	DB_DATAGRAM *datagram, *new_datagram;
+
+	datagram = (DB_DATAGRAM*)shmem.alloc;
+	new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
+
+	memcpy(new_datagram,datagram,datagram->size);
+
+	UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
+
+	return new_datagram;
+
+}
+
+int ipc_send(DB_DATAGRAM* data){
+
+	if(data->size > SHMEM_SIZE){
+		return -1;
+	}
+
+	memcpy(shmem.alloc, data, data->size);
+
+	UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
+
+	return 0;
+	
+}
+
+#else
+/*
+	---------------------------------------------------
+	Capa de comunicacion para el CLIENTE
+
+	---------------------------------------------------
+ */
+
 int ipc_send(DB_DATAGRAM* data){
 
 	if(data->size > SHMEM_SIZE){
@@ -210,6 +265,8 @@ int ipc_send(DB_DATAGRAM* data){
 
 DB_DATAGRAM* ipc_receive(){
 
+	WAIT_FOR(SEM_SERVER);
+
 	DB_DATAGRAM *datagram, *new_datagram;
 
 	datagram = (DB_DATAGRAM*)shmem.alloc;
@@ -217,33 +274,39 @@ DB_DATAGRAM* ipc_receive(){
 
 	memcpy(new_datagram,datagram,datagram->size);
 
-	UNBLOCK(SEM_CLIENT);
-
 	return new_datagram;
 
 }
 
-static int get_sem_val(int semid, int semnum ){
-        return(semctl(semid, semnum, GETVAL));
-}
+#endif
 
 #ifdef SERVER
 static void shmem_serve(){
 
+	char* mensaje="Mensaje recibido";
+	int n=strlen(mensaje);
+
 	while (1){
 
-		//STEP-4
-		WAIT_FOR(SEM_CLIENT); //Esperamos que mande un comando
+		DB_DATAGRAM* dg=ipc_receive();
 
-		DB_DATAGRAM* dg=(DB_DATAGRAM*)shmem.alloc;
+		CLIPRINT("Mensaje recibido: %s\n", dg->dg_cmd);
 
-		CLIPRINT("Mensaje recibido: %s", dg->dg_cmd);
+		if(strcmp(dg->dg_cmd,"exit")==0){
+			break;
+		}
 
-		//DUMP_DATAGRAM(dg)
+		dg->size=sizeof(DB_DATAGRAM) + n;
+		memcpy(dg->dg_cmd, mensaje, strlen(mensaje));
 
-		UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
+		ipc_send(dg);
+		free(dg);
 		
 	}
+
+	CLIPRINTE("Cliente desconectado. Limpiando...\n");
+
+	ipc_disconnect();
 
 }
 #endif
@@ -338,8 +401,9 @@ void ipc_accept(){
 
 			CLIPRINTE("Sincronizacion completa. Esperando comandos...\n");
 
-
 			UNBLOCK_QUEUE(SEM_SRV_QUEUE);
+
+			//PRINT_SEM_VALUES;//Ambos semaforos en 0
 
 			shmem_serve();
 
@@ -359,9 +423,6 @@ void ipc_accept(){
 
 #ifdef CLIENT
 int ipc_connect(int argc, char** args){
-
-	char buffer[SHMEM_SIZE] = {0};
-	int n;
 
 	DB_DATAGRAM *datagram;
 
@@ -415,37 +476,29 @@ int ipc_connect(int argc, char** args){
 	
 	printf("Listo para enviar comandos...\n");
 
-	while ((n = read(0, buffer, SHMEM_SIZE)) > 0 ){
+	//PRINT_SEM_VALUES;//Ambos semaforos en 0
 
-		int size = sizeof(DB_DATAGRAM) + n;
-
-		datagram = (DB_DATAGRAM*) calloc(1, size);
-
-		datagram->size = size;
-		datagram->opcode=OP_CMD;
-		strcpy(datagram->dg_cmd, buffer);
-		datagram->dg_cmd[n] = 0;
-
-		printf("Enviando comando: %s", datagram->dg_cmd);
-
-		//STEP-4 Up -> Client
-		ipc_send(datagram);
-
-		WAIT_FOR(SEM_SERVER); // Esperamos un mensaje
-
-		free(datagram);
-	}
-
-	
-	shmem_detach();
-
+	return 0;
 }
+
 #endif
 
 
 void ipc_disconnect(){
 
+	printf("Disconnecting...\n");
+
+#ifdef SERVER
 	shmem_destroy();
 	sem_destroy();
 
+#else
+	shmem_detach();
+#endif
+	
+
+
 }
+
+
+
