@@ -27,9 +27,6 @@
 #define WAIT_FOR_QUEUE(sem) sem_down(shmem.queueid, sem)
 #define UNBLOCK_QUEUE(sem) 	sem_up(shmem.queueid, sem)
 
-#define CLIPRINTE(msg) 		printf("[CLIENT #%d] " msg, cli_count)
-#define CLIPRINT(msg, ...) 	printf("[CLIENT #%d] " msg, cli_count, __VA_ARGS__)
-#define SRVPRINT(msg) 		printf("[SERVER] " msg)
 
 typedef struct {
 
@@ -45,8 +42,11 @@ static SHMEM_ALLOC shmem;
 
 #define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\nalloc: %p\n]\n\n", shmem.semid, shmem.queueid, shmem.memid,shmem.alloc);
 
-static int cli_count = 0;
+#ifdef SERVER
 
+extern int cli_count;
+
+#endif
 
 static void shmem_init_with_key(key_t shmemkey){
 
@@ -226,6 +226,7 @@ static int get_sem_val(int semid, int semnum ){
         return(semctl(semid, semnum, GETVAL));
 }
 
+#ifdef SERVER
 static void shmem_serve(){
 
 	while (1){
@@ -244,10 +245,11 @@ static void shmem_serve(){
 	}
 
 }
+#endif
 
-void ipc_listen(){
+int ipc_listen(int argc, char** args){
 
-	SRVPRINT("Inicializando IPC de shared memory...\n");
+	SRVPRINTE("Inicializando IPC de shared memory...\n");
 
 	shmem_init();
 
@@ -258,10 +260,13 @@ void ipc_listen(){
 	sem_set(shmem.queueid, SEM_QUEUE, 1);
 	sem_set(shmem.queueid, SEM_SRV_QUEUE, 0);
 
-	SRVPRINT("Escuchando clientes...\n");	
+	SRVPRINTE("Escuchando clientes...\n");	
+
+	return 0;
 
 }
 
+#ifdef SERVER
 void ipc_accept(){
 
 	int pid;
@@ -272,13 +277,13 @@ void ipc_accept(){
 	//STEP-0: Bloquea hasta que un cliente ejecute semup
 	WAIT_FOR(SEM_CLIENT); 
 
-	SRVPRINT("Cliente conectado...\n");
+	SRVPRINTE("Cliente conectado...\n");
 
 	cli_count++;
 
 	switch (pid = fork()){
 		case -1:
-			SRVPRINT("fork failed.\n");
+			SRVPRINTE("fork failed.\n");
 			exit(1);
 			break;
 
@@ -337,7 +342,7 @@ void ipc_accept(){
 
 			shmem_serve();
 
-			SRVPRINT("Servidor hijo termina\n");
+			SRVPRINTE("Servidor hijo termina\n");
 			exit(0);
 			break;
 		
@@ -349,8 +354,10 @@ void ipc_accept(){
 	}
 
 }
+#endif
 
-void ipc_connect(){
+#ifdef CLIENT
+int ipc_connect(int argc, char** args){
 
 	char buffer[SHMEM_SIZE] = {0};
 	int n;
@@ -410,7 +417,7 @@ void ipc_connect(){
 	
 	printf("Listo para enviar comandos...\n");
 
-	while ( (n = read(0, buffer, SHMEM_SIZE)) > 0 ){
+	while ((n = read(0, buffer, SHMEM_SIZE)) > 0 ){
 
 		int size = sizeof(DB_DATAGRAM) + n;
 
@@ -438,7 +445,7 @@ void ipc_connect(){
 	shmem_detach();
 
 }
-
+#endif
 
 
 void ipc_disconnect(){
