@@ -1,13 +1,17 @@
 
-.PHONY: all clean
+GCCFLAGS=-Wall -g -DCLIENT -I../include client.c
 
-all: client.o
 
-run: clean client.o
-	./client
+.PHONY: all clean shmem socket
 
-client.o:
-	gcc -Wall -g -o client -I../include client.c ../ipc/shmem.c
+all: shmem socket
+
+shmem:
+	gcc $(GCCFLAGS) -o client-shmem ../ipc/shmem.c
+
+socket:
+	gcc $(GCCFLAGS) -o client-socket ../ipc/socket.c
+
 clean: 
 	rm -f *.o
-	rm -f client
+	rm -f client-*

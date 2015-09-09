@@ -1,7 +1,9 @@
 
-.PHONY: all clean sqlite3
+GCCFLAGS=-Wall -g -DSERVER -I../include sqlite3/sqlite3.o server.c 
 
-all: shmem
+.PHONY: all clean sqlite3 socket shmem
+
+all: shmem socket
 
 run: clean server.o
 	./server
@@ -9,14 +11,12 @@ run: clean server.o
 sqlite3:
 	cd sqlite3; make all
 
-
 shmem: sqlite3
-	gcc -Wall -g -o server-shmem -I../include server.c ../ipc/shmem.c sqlite3/sqlite3.o
+	gcc $(GCCFLAGS) -o server-shmem ../ipc/shmem.c 
 
 
 socket: sqlite3
-	gcc -Wall -g -o server-socket -I../include server.c ../ipc/socket.c sqlite3/sqlite3.o
-
+	gcc $(GCCFLAGS) -o server-socket ../ipc/socket.c
 
 clean: 
 	cd sqlite3; make clean
