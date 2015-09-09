@@ -6,6 +6,7 @@
 
 #define BUFFER_SIZE 50
 
+int cli_count = 0;
 
 void int_handler(int s){
 	printf("Cleaning up before exit!\n");
@@ -16,16 +17,22 @@ void int_handler(int s){
 
 int main(int argc, char** argv){
 	
+	int err;
+
 	// char buffer[BUFFER_SIZE];
 	// char c;
 	// int read=0;
 
 	printf("Starting server...\n");
 
-
 	signal(SIGINT, int_handler);
 
-	ipc_listen();
+	err = ipc_listen(argc-1, ++argv);
+
+	if(err==-1){
+		fprintf(stderr, "Invalid argument count.\n");
+		exit(1);
+	}
 
 	while(1){
 		ipc_accept();
@@ -34,16 +41,6 @@ int main(int argc, char** argv){
 
 	}
 
-	
-
-		// while((c=getchar())!='\n' &&  read<BUFFER_SIZE){
-		// 		buffer[read++]=c;
-		// }
-
-		//buffer tiene el comando a ejecutar
-
-
-	
 
 	
 	return 0;
