@@ -22,3 +22,4 @@ DB_DATAGRAM* ipc_receive();
 
 void ipc_disconnect();
 
+void ipc_free();
