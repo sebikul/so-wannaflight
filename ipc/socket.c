@@ -26,13 +26,6 @@ typedef struct {
 
 static SOCK_CLIENT sock_client;
 
-static void close_client(){
-
-	close(sock_client.clientfd);
-	sock_client.clientfd = 0;
-
-}
-
 #ifdef SERVER
 int ipc_listen(int argc, char** args){
 
@@ -78,15 +71,13 @@ void ipc_sync(){
 
 	SRVPRINT("Cliente %s conectado, esperando datos.\n", client_ip);
 
-	//Retorna el id del cliente actual. Como estamos en el hijo,
-	//la cuenta ya no se incrementa.
-	//return cli_count;
-
 }
 
 void ipc_waitsync(){
 
-	close_client();
+	//Desconectamos el cliente del proceso padre, solo el
+	//hijo necesita el fd del socket nuevo.
+	ipc_disconnect();
 
 }
 
@@ -166,6 +157,9 @@ DB_DATAGRAM* ipc_receive(){
 }
 
 void ipc_disconnect(){
+
+	close(sock_client.clientfd);
+	sock_client.clientfd = 0;
 
 }
 

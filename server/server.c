@@ -88,15 +88,11 @@ int main(int argc, char** argv){
 				exit(1);
 				break;
 
-			case 0:{ /* hijo */
-
+			case 0: /* hijo */
 				ipc_sync();
-
 				serve();
 
 				break;
-
-			}
 
 			default:
 	 			
