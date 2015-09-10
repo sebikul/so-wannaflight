@@ -11,6 +11,8 @@
 #include "ipc.h"
 
 #define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(shmem.semid, SEM_CLIENT), get_sem_val(shmem.semid, SEM_SERVER))
+#define PRINT_QSEM_VALUES 	printf("SEM_QUEUE: %d\nSEM_SRV_QUEUE: %d\n", get_sem_val(shmem.queueid, SEM_QUEUE), get_sem_val(shmem.queueid, SEM_SRV_QUEUE))
+
 
 #define SEM_QUEUE			0
 #define SEM_SRV_QUEUE		1
@@ -57,7 +59,7 @@ static void shmem_init_with_key(key_t shmemkey){
 
 	memset(shmem.alloc, 0, SHMEM_SIZE);
 
-	printf("Initialized shared memory zone with id %d\n", shmem.memid);
+	//printf("Initialized shared memory zone with id %d\n", shmem.memid);
 
 }
 
@@ -76,7 +78,7 @@ static void sem_init_with_key(key_t semkey){
 
 	//Creamos los semaforos para sincronizar cliente servidor
 	if ((shmem.semid = semget(semkey, 2, 0)) >= 0 ){
-		printf("Sync semaphores already exist with id: %d\n", shmem.semid);
+		//printf("Sync semaphores already exist with id: %d\n", shmem.semid);
 		return;
 	}
 		
@@ -85,7 +87,7 @@ static void sem_init_with_key(key_t semkey){
 		exit(1);
 	}
 
-	printf("Initialized sync semaphores with id %d\n", shmem.semid);
+	//printf("Initialized sync semaphores with id %d\n", shmem.semid);
 
 }
 
@@ -107,7 +109,7 @@ static void sem_queue_init(){
 
 	//Creamos el semaforo para la cola de clientes
 	if ((shmem.queueid = semget(queuekey, 2, 0)) >= 0 ){
-		printf("Queue semaphore already exist with id: %d\n", shmem.queueid);
+		//printf("Queue semaphore already exist with id: %d\n", shmem.queueid);
 		return;
 	}
 		
@@ -116,7 +118,7 @@ static void sem_queue_init(){
 		exit(1);
 	}
 
-	printf("Initialized queue semaphores with id %d\n", shmem.queueid);
+	//printf("Initialized queue semaphores with id %d\n", shmem.queueid);
 
 
 }
@@ -166,6 +168,11 @@ static void sem_destroy(){
 
 	//Destruimos los semaforos
 	semctl(shmem.semid, 0, IPC_RMID);
+	
+}
+
+static void sem_queue_destroy(){
+
 	semctl(shmem.queueid, 0, IPC_RMID);
 
 }
@@ -415,8 +422,6 @@ int ipc_connect(int argc, char** args){
 
 	//STEP-2
 	WAIT_FOR(SEM_SERVER);//Esperamos que el servidor llene la shmemkey
-	
-	//DUMP_SHMEM_DATA();
 
 	printf("Recibiendo zona de memoria...\n");
 
@@ -451,14 +456,16 @@ void ipc_disconnect(){
 #ifdef SERVER
 	shmem_destroy();
 	sem_destroy();
-
 #else
 	shmem_detach();
 #endif
-	
-
 
 }
 
+#ifdef SERVER
+void ipc_free(){
 
+	sem_queue_destroy();
 
+}
+#endif
