@@ -30,7 +30,6 @@ static void send_cmd(char* cmd, int n){
 
 	printf("Enviando comando: %s\n", datagram->dg_cmd);
 
-	//DUMP_DATAGRAM(datagram);
 	ipc_send(datagram);
 
 	free(datagram);
@@ -60,8 +59,6 @@ int main(int argc, char** argv){
 		send_cmd(buffer, n);
 
 		datagram = ipc_receive();
-		//DUMP_DATAGRAM(datagram);
-
 
 		printf("Respuesta: %s\n", datagram->dg_cmd);
 
@@ -74,5 +71,7 @@ int main(int argc, char** argv){
 
 	printf("Disconnecting\n");
 	ipc_disconnect();
+
+	return 0;
 
 }

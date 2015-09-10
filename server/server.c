@@ -13,6 +13,7 @@ int cli_count = 0;
 void int_handler(int s){
 	printf("Cleaning up before exit!\n");
 	ipc_disconnect();
+	ipc_free();
 	exit(0); 
 }
 
@@ -29,16 +30,20 @@ void serve(int cli_count){
 
 		CLIPRINT("Mensaje recibido: %s\n", dg->dg_cmd);
 
-		// if(strcmp(dg->dg_cmd, "exit") == 0){
-		// 	CLIPRINTE("Exit command received!\n");
-		// 	dg->opcode = OP_EXIT;
+		if(strcmp(dg->dg_cmd, "exit") == 0){
 
-		// 	DUMP_DATAGRAM(dg);
-		// 	ipc_send(dg);
+			CLIPRINTE("Exit command received!\n");
+			dg->opcode = OP_EXIT;
 
-		// 	free(dg);
-		// 	break;
-		// }
+			ipc_send(dg);
+
+			free(dg);
+			CLIPRINTE("Cliente desconectado. Limpiando...\n");
+
+			ipc_disconnect();
+
+			exit(0);
+		}
 
 		dg->size = sizeof(DB_DATAGRAM) + n;
 		memcpy(dg->dg_cmd, mensaje, n);
@@ -52,11 +57,7 @@ void serve(int cli_count){
 
 	}
 
-	CLIPRINTE("Cliente desconectado. Limpiando...\n");
 
-	ipc_disconnect();
-
-	exit(0);
 
 }
 

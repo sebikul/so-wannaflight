@@ -42,6 +42,8 @@ int ipc_listen(int argc, char** args){
 
 	listen(socketfd, SOCKET_BACKLOG); 
 
+	return 0;
+
 }
 #endif
 
@@ -67,38 +69,42 @@ void ipc_accept(){
 			exit(1);
 			break;
 
-		case 0: /* hijo */
+		case 0:{ /* hijo */
 
-			SRVPRINTE("Fork creado, esperando datos.\n");
+				char *client_ip = inet_ntoa(cli_addr.sin_addr);
 
-			int read_size;
-			char client_message[2000];
-			 
-			//Receive a message from client
-			while((read_size = recv(clientfd , client_message , 2000 , 0)) > 0 ){
-				//end of string marker
-				client_message[read_size] = '\0';
-				
-				CLIPRINT("Mensaje recibido: %s\n", client_message);
+				SRVPRINT("Cliente %s conectado, esperando datos.\n", client_ip);
 
-				//Send the message back to client
-				write(clientfd , client_message , strlen(client_message));
-				
-				//clear the message buffer
-				memset(client_message, 0, 2000);
+				int read_size;
+				char client_message[2000];
+				 
+				//Receive a message from client
+				while((read_size = recv(clientfd , client_message , 2000 , 0)) > 0 ){
+					//end of string marker
+					client_message[read_size] = '\0';
+					
+					CLIPRINT("Mensaje recibido: %s\n", client_message);
+
+					//Send the message back to client
+					write(clientfd , client_message , strlen(client_message));
+					
+					//clear the message buffer
+					memset(client_message, 0, 2000);
+				}
+				 
+				if(read_size == 0){
+					puts("Client disconnected");
+					fflush(stdout);
+				}else if(read_size == -1){
+					perror("recv failed");
+				}
+
+				close(clientfd);
+
+
+				break;
+
 			}
-			 
-			if(read_size == 0){
-				puts("Client disconnected");
-				fflush(stdout);
-			}else if(read_size == -1){
-				perror("recv failed");
-			}
-
-			close(clientfd);
-
-
-			break;
 
 		default: /* padre */
 
@@ -162,15 +168,32 @@ int ipc_connect(int argc, char** args){
 
 }
 
-// int ipc_send(DB_DATAGRAM* data){
+int ipc_send(DB_DATAGRAM* data){
 
-// }
+	return 0;
 
-// DB_DATAGRAM* ipc_receive(){
+}
 
-// }
+DB_DATAGRAM* ipc_receive(){
+
+	return NULL;
+
+}
+
+int ipc_sync(){
+
+	return 0;
+
+}
+
+void ipc_waitsync(){
+
+}
 
 void ipc_disconnect(){
 
 }
 
+void ipc_free(){
+	
+}
