@@ -18,7 +18,7 @@ void int_handler(int s){
 }
 
 
-void serve(int cli_count){
+void serve(){
 
 	static char* mensaje = "Mensaje recibido";
 	int n = strlen(mensaje);
@@ -57,8 +57,6 @@ void serve(int cli_count){
 
 	}
 
-
-
 }
 
 int main(int argc, char** argv){
@@ -81,6 +79,8 @@ int main(int argc, char** argv){
 
 		ipc_accept();
 
+		cli_count++;
+
 		switch (pid = fork()){
 
 			case -1:
@@ -90,11 +90,9 @@ int main(int argc, char** argv){
 
 			case 0:{ /* hijo */
 
-				int cli_count;
+				ipc_sync();
 
-				cli_count = ipc_sync();
-
-				serve(cli_count);
+				serve();
 
 				break;
 
