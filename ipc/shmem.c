@@ -5,7 +5,6 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "config.h"
 #include "database.h"
@@ -219,9 +218,7 @@ DB_DATAGRAM* ipc_receive(){
 	datagram = (DB_DATAGRAM*)shmem.alloc;
 	new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
 
-	memcpy(new_datagram,datagram,datagram->size);
-
-	UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
+	memcpy(new_datagram, datagram, datagram->size);
 
 	return new_datagram;
 
@@ -272,43 +269,12 @@ DB_DATAGRAM* ipc_receive(){
 	datagram = (DB_DATAGRAM*)shmem.alloc;
 	new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
 
-	memcpy(new_datagram,datagram,datagram->size);
+	memcpy(new_datagram, datagram, datagram->size);
 
 	return new_datagram;
 
 }
 
-#endif
-
-#ifdef SERVER
-static void shmem_serve(){
-
-	char* mensaje="Mensaje recibido";
-	int n=strlen(mensaje);
-
-	while (1){
-
-		DB_DATAGRAM* dg=ipc_receive();
-
-		CLIPRINT("Mensaje recibido: %s\n", dg->dg_cmd);
-
-		if(strcmp(dg->dg_cmd,"exit")==0){
-			break;
-		}
-
-		dg->size=sizeof(DB_DATAGRAM) + n;
-		memcpy(dg->dg_cmd, mensaje, strlen(mensaje));
-
-		ipc_send(dg);
-		free(dg);
-		
-	}
-
-	CLIPRINTE("Cliente desconectado. Limpiando...\n");
-
-	ipc_disconnect();
-
-}
 #endif
 
 int ipc_listen(int argc, char** args){
@@ -345,80 +311,74 @@ void ipc_accept(){
 
 	cli_count++;
 
-	switch (pid = fork()){
-		case -1:
-			SRVPRINTE("fork failed.\n");
-			exit(1);
-			break;
+}
 
-		case 0: /* hijo */
+int ipc_sync(){
+	
 
-			CLIPRINTE("Fork creado, esperando pedido de memoria.\n");
+	CLIPRINTE("Fork creado, esperando pedido de memoria.\n");
 
-			//STEP-1			
-			WAIT_FOR(SEM_CLIENT); //Esperamos al primer mensaje
+	//STEP-1			
+	WAIT_FOR(SEM_CLIENT); //Esperamos al primer mensaje
 
-			DB_DATAGRAM *datagram=(DB_DATAGRAM*)shmem.alloc;
+	DB_DATAGRAM *datagram=(DB_DATAGRAM*)shmem.alloc;
 
-			if(datagram->dg_shmemkey==-1){
-				CLIPRINTE("Pedido de zona de memoria recibido.\n");
-			}else{
-				CLIPRINTE("Error en el protocolo de sincronizacion.\n");
-				DUMP_DATAGRAM(datagram);
-				exit(1);
-			}
-
-			//shmem.alloc tiene el pedido de una zona de memoria. 
-
-			//DUMP_SHMEM_DATA();
-
-			datagram->dg_shmemkey = ftok("../database.sqlite", cli_count); 
-
-			int oldsemid = shmem.semid;
-
-			key_t shmemkey = datagram->dg_shmemkey;
-
-			shmem_detach();
-
-			shmem_init_with_key(shmemkey);
-			sem_init_with_key(shmemkey);
-
-			//Reseteamos los nuevos semaforos 
-			sem_reset();
-
-			//DUMP_SHMEM_DATA()
-
-			CLIPRINTE("Enviando id de zona de memoria.\n");
-
-			//STEP-2
-			//UNBLOCK(SEM_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
-			sem_up(oldsemid,SEM_SERVER);
-
-
-			//STEP-3
-			//WAIT_FOR(SEM_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
-			sem_down(oldsemid,SEM_CLIENT);
-
-			CLIPRINTE("Sincronizacion completa. Esperando comandos...\n");
-
-			UNBLOCK_QUEUE(SEM_SRV_QUEUE);
-
-			//PRINT_SEM_VALUES;//Ambos semaforos en 0
-
-			shmem_serve();
-
-			SRVPRINTE("Servidor hijo termina\n");
-			exit(0);
-			break;
-		
-		default: /* padre */
-
-			WAIT_FOR_QUEUE(SEM_SRV_QUEUE);
-
-			break;
+	if(datagram->dg_shmemkey==-1){
+		CLIPRINTE("Pedido de zona de memoria recibido.\n");
+	}else{
+		CLIPRINTE("Error en el protocolo de sincronizacion.\n");
+		DUMP_DATAGRAM(datagram);
+		exit(1);
 	}
 
+	//shmem.alloc tiene el pedido de una zona de memoria. 
+
+	//DUMP_SHMEM_DATA();
+
+	datagram->dg_shmemkey = ftok("../database.sqlite", cli_count); 
+
+	int oldsemid = shmem.semid;
+
+	key_t shmemkey = datagram->dg_shmemkey;
+
+	shmem_detach();
+
+	shmem_init_with_key(shmemkey);
+	sem_init_with_key(shmemkey);
+
+	//Reseteamos los nuevos semaforos 
+	sem_reset();
+
+	//DUMP_SHMEM_DATA()
+
+	CLIPRINTE("Enviando id de zona de memoria.\n");
+
+	//STEP-2
+	//UNBLOCK(SEM_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
+	sem_up(oldsemid,SEM_SERVER);
+
+
+	//STEP-3
+	//WAIT_FOR(SEM_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
+	sem_down(oldsemid,SEM_CLIENT);
+
+	CLIPRINTE("Sincronizacion completa. Esperando comandos...\n");
+
+	UNBLOCK_QUEUE(SEM_SRV_QUEUE);
+
+	//PRINT_SEM_VALUES;//Ambos semaforos en 0
+	
+	return cli_count;
+
 }
+
+void ipc_waitsync(){
+
+	WAIT_FOR_QUEUE(SEM_SRV_QUEUE);
+
+}
+
+
 #endif
 
 #ifdef CLIENT
