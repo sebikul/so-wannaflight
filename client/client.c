@@ -16,10 +16,30 @@ void int_handler(int s){
 	exit(0); 
 }
 
+static void send_cmd(char* cmd, int n){
+
+	DB_DATAGRAM *datagram;
+
+	int size = sizeof(DB_DATAGRAM) + n;
+
+	datagram = (DB_DATAGRAM*) calloc(1, size);
+
+	datagram->size = size;
+	datagram->opcode = OP_CMD;
+	strcpy(datagram->dg_cmd, cmd);
+
+	printf("Enviando comando: %s\n", datagram->dg_cmd);
+
+	//DUMP_DATAGRAM(datagram);
+	ipc_send(datagram);
+
+	free(datagram);
+}
+
 int main(int argc, char** argv){
 
 	char buffer[SHMEM_SIZE] = {0};
-	int n, size, err;
+	int n, err;
 	DB_DATAGRAM *datagram;
 
 	printf("Starting client...\n");
@@ -36,31 +56,23 @@ int main(int argc, char** argv){
 	while ((n = read(0, buffer, SHMEM_SIZE)) > 0 ){
 
 		buffer[n-1]=0;
-		size = sizeof(DB_DATAGRAM) + n;
-
-		datagram = (DB_DATAGRAM*) calloc(1, size);
-
-		datagram->size = size;
-		datagram->opcode=OP_CMD;
-		strcpy(datagram->dg_cmd, buffer);
-		datagram->dg_cmd[n] = 0;
-
-		printf("Enviando comando: %s\n", datagram->dg_cmd);
-
-		//STEP-4 Up -> Client
-		ipc_send(datagram);
-
-		free(datagram);
+		
+		send_cmd(buffer, n);
 
 		datagram = ipc_receive();
+		//DUMP_DATAGRAM(datagram);
+
 
 		printf("Respuesta: %s\n", datagram->dg_cmd);
 
+		if(datagram->opcode == OP_EXIT){
+			printf("Exiting...\n");
+			break;
+		}
 
 	}
 
 	printf("Disconnecting\n");
 	ipc_disconnect();
-
 
 }
