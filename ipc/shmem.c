@@ -306,8 +306,6 @@ int ipc_listen(int argc, char** args){
 #ifdef SERVER
 void ipc_accept(){
 
-	int pid;
-
 	//Reseteamos los valores de los semaforos para aceptar al nuevo cliente.
 	sem_reset();
 
@@ -316,11 +314,9 @@ void ipc_accept(){
 
 	SRVPRINTE("Cliente conectado...\n");
 
-	cli_count++;
-
 }
 
-int ipc_sync(){
+void ipc_sync(){
 	
 
 	CLIPRINTE("Fork creado, esperando pedido de memoria.\n");
@@ -374,8 +370,6 @@ int ipc_sync(){
 	UNBLOCK_QUEUE(SEM_SRV_QUEUE);
 
 	//PRINT_SEM_VALUES;//Ambos semaforos en 0
-	
-	return cli_count;
 
 }
 
@@ -438,7 +432,7 @@ int ipc_connect(int argc, char** args){
 	//DUMP_SHMEM_DATA();
 
 	UNBLOCK_QUEUE(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
-	
+
 	printf("Listo para enviar comandos...\n");
 
 	//PRINT_SEM_VALUES;//Ambos semaforos en 0
