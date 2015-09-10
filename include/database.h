@@ -36,7 +36,7 @@ typedef struct __attribute__((packed)){
 	airport_id destination;
 } DB_ENTRY;
 
-typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD} OPCODE;
+typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT} OPCODE;
 
 typedef struct {
 
@@ -70,7 +70,7 @@ typedef struct {
 										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
 
 #define DUMP_DATAGRAM(datagram)		{\
-										printf("Size: %zu\nopcode: %d\nCount: %d\nSeat: %d\nResult: %s\nCMD: %s\n",\
+										printf("\nSize: %zu\nopcode: %d\nCount: %d\nSeat: %d\nResult: %s\nCMD: %s\n\n",\
 											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",datagram->dg_cmd);\
 									}
 										//for(int __i = 0;__i<datagram->dg_count;__i++){\
