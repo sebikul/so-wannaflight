@@ -10,6 +10,10 @@ int ipc_listen(int argc, char** args);
 
 void ipc_accept();
 
+int ipc_sync();
+
+void ipc_waitsync();
+
 int ipc_connect(int argc, char** args);
 
 int ipc_send(DB_DATAGRAM* data);
