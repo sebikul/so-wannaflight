@@ -10,13 +10,13 @@
 
 #define BUFFER_SIZE 50
 
-void int_handler(int s){
+void int_handler(int s) {
 	printf("Cleaning up before exit!\n");
 	ipc_disconnect();
-	exit(0); 
+	exit(0);
 }
 
-static void send_cmd(char* cmd, int n){
+static void send_cmd(char* cmd, int n) {
 
 	DB_DATAGRAM *datagram;
 
@@ -35,7 +35,7 @@ static void send_cmd(char* cmd, int n){
 	free(datagram);
 }
 
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
 
 	char buffer[SHMEM_SIZE] = {0};
 	int n, err;
@@ -45,24 +45,24 @@ int main(int argc, char** argv){
 
 	signal(SIGINT, int_handler);
 
-	err = ipc_connect(argc-1, ++argv);
+	err = ipc_connect(argc - 1, ++argv);
 
-	if(err == -1){
+	if (err == -1) {
 		fprintf(stderr, "Invalid argument count.\n");
 		exit(1);
 	}
 
-	while ((n = read(0, buffer, SHMEM_SIZE)) > 0 ){
+	while ((n = read(0, buffer, SHMEM_SIZE)) > 0 ) {
 
-		buffer[n-1]=0;
-		
+		buffer[n - 1] = 0;
+
 		send_cmd(buffer, n);
 
 		datagram = ipc_receive();
 
 		printf("Respuesta: %s\n", datagram->dg_cmd);
 
-		if(datagram->opcode == OP_EXIT){
+		if (datagram->opcode == OP_EXIT) {
 			printf("Exiting...\n");
 			break;
 		}

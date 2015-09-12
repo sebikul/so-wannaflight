@@ -10,27 +10,27 @@
 
 int cli_count = 0;
 
-void int_handler(int s){
+void int_handler(int s) {
 	printf("Cleaning up before exit!\n");
 	ipc_disconnect();
 	ipc_free();
-	exit(0); 
+	exit(0);
 }
 
 
-void serve(){
+void serve() {
 
 	static char* mensaje = "Mensaje recibido";
 	int n = strlen(mensaje);
 
-	while(1){
+	while (1) {
 
 		DB_DATAGRAM* dg = ipc_receive();
 		//DUMP_DATAGRAM(dg);
 
 		CLIPRINT("Mensaje recibido: %s\n", dg->dg_cmd);
 
-		if(strcmp(dg->dg_cmd, "exit") == 0){
+		if (strcmp(dg->dg_cmd, "exit") == 0) {
 
 			CLIPRINTE("Exit command received!\n");
 			dg->opcode = OP_EXIT;
@@ -59,8 +59,8 @@ void serve(){
 
 }
 
-int main(int argc, char** argv){
-	
+int main(int argc, char** argv) {
+
 	int err;
 	int pid;
 
@@ -68,41 +68,41 @@ int main(int argc, char** argv){
 
 	signal(SIGINT, int_handler);
 
-	err = ipc_listen(argc-1, ++argv);
+	err = ipc_listen(argc - 1, ++argv);
 
-	if(err==-1){
+	if (err == -1) {
 		fprintf(stderr, "Invalid argument count.\n");
 		exit(1);
 	}
 
-	while(1){
+	while (1) {
 
 		ipc_accept();
 
 		cli_count++;
 
-		switch (pid = fork()){
+		switch (pid = fork()) {
 
-			case -1:
-				printf("fork failed.\n");
-				exit(1);
-				break;
+		case -1:
+			printf("fork failed.\n");
+			exit(1);
+			break;
 
-			case 0: /* hijo */
-				ipc_sync();
-				serve();
+		case 0: /* hijo */
+			ipc_sync();
+			serve();
 
-				break;
+			break;
 
-			default:
-	 			
-	 			//En caso de ser necesario, esperamos que el cliente termine de 
-	 			//sincronizar con el servidor para aceptar el proximo cliente.
-				ipc_waitsync();
+		default:
 
-				printf("Cliente aceptado. Esperando mas clientes...\n");
+			//En caso de ser necesario, esperamos que el cliente termine de
+			//sincronizar con el servidor para aceptar el proximo cliente.
+			ipc_waitsync();
 
-				break;
+			printf("Cliente aceptado. Esperando mas clientes...\n");
+
+			break;
 
 		}
 
