@@ -2,6 +2,16 @@
 	"folders":
 	[
 		{
+			"file_exclude_patterns":
+			[
+				"client/client-*",
+				"server/server-*"
+			],
+			"folder_exclude_patterns":
+			[
+				"client/client-*.*",
+				"server/server-*.*"
+			],
 			"path": "."
 		}
 	]

@@ -21,4 +21,4 @@ socket: sqlite3
 clean: 
 	cd sqlite3; make clean
 	rm -f *.o
-	rm -f server-*
+	rm -rf server-*

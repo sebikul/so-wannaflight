@@ -14,4 +14,4 @@ socket:
 
 clean: 
 	rm -f *.o
-	rm -f client-*
+	rm -rf client-*
