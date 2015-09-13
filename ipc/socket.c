@@ -10,10 +10,6 @@
 #include "database.h"
 #include "ipc.h"
 
-#ifdef SERVER
-extern int cli_count;
-#endif
-
 struct session_t{
 	int serverfd;
 
