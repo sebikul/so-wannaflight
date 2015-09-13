@@ -10,8 +10,8 @@
 #include "database.h"
 #include "ipc.h"
 
-#define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(shmem.semid, SEM_CLIENT), get_sem_val(shmem.semid, SEM_SERVER))
-#define PRINT_QSEM_VALUES 	printf("SEM_QUEUE: %d\nSEM_SRV_QUEUE: %d\n", get_sem_val(shmem.queueid, SEM_QUEUE), get_sem_val(shmem.queueid, SEM_SRV_QUEUE))
+#define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(session->semid, SEM_CLIENT), get_sem_val(session->emid, SEM_SERVER))
+#define PRINT_QSEM_VALUES 	printf("SEM_QUEUE: %d\nSEM_SRV_QUEUE: %d\n", get_sem_val(session->queueid, SEM_QUEUE), get_sem_val(session->queueid, SEM_SRV_QUEUE))
 
 
 #define SEM_QUEUE			0
@@ -20,24 +20,23 @@
 #define SEM_SERVER 			0
 #define SEM_CLIENT 			1
 
-#define WAIT_FOR(sem) 		sem_down(shmem.semid, sem)
-#define UNBLOCK(sem)		sem_up(shmem.semid, sem)
+#define WAIT_FOR(sem) 		sem_down(session->semid, sem)
+#define UNBLOCK(sem)		sem_up(session->semid, sem)
 
-#define WAIT_FOR_QUEUE(sem) sem_down(shmem.queueid, sem)
-#define UNBLOCK_QUEUE(sem) 	sem_up(shmem.queueid, sem)
+#define WAIT_FOR_QUEUE(sem) sem_down(session->queueid, sem)
+#define UNBLOCK_QUEUE(sem) 	sem_up(session->queueid, sem)
 
 
-typedef struct {
+struct session_t{
+	
+	int clientid;
 
 	int semid;
 	int queueid;
 
 	int memid;
 	char* alloc;
-
-} SHMEM_ALLOC;
-
-static SHMEM_ALLOC shmem;
+};
 
 #define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\nalloc: %p\n]\n\n", shmem.semid, shmem.queueid, shmem.memid,shmem.alloc);
 
@@ -45,19 +44,19 @@ static SHMEM_ALLOC shmem;
 extern int cli_count;
 #endif
 
-static void shmem_init_with_key(key_t shmemkey) {
+static void shmem_init_with_key(ipc_session session, key_t shmemkey) {
 
-	if ( (shmem.memid = shmget(shmemkey, SHMEM_SIZE, IPC_CREAT | 0666)) == -1 ) {
+	if ( (session->memid = shmget(shmemkey, SHMEM_SIZE, IPC_CREAT | 0666)) == -1 ) {
 		printf("shmget failed.\n");
 		exit(1);
 	}
 
-	if ( !(shmem.alloc = shmat(shmem.memid, NULL, 0)) ) {
+	if ( !(session->alloc = shmat(session->memid, NULL, 0)) ) {
 		printf("shmget failed.\n");
 		exit(1);
 	}
 
-	memset(shmem.alloc, 0, SHMEM_SIZE);
+	memset(session->alloc, 0, SHMEM_SIZE);
 
 	//printf("Initialized shared memory zone with id %d\n", shmem.memid);
 
@@ -66,23 +65,23 @@ static void shmem_init_with_key(key_t shmemkey) {
 /*
 	Crea la zona de memoria compartida
  */
-static void shmem_init() {
+static void shmem_init(ipc_session session) {
 
 	key_t shmemkey = ftok("../database.sqlite", 0);
 
-	shmem_init_with_key(shmemkey);
+	shmem_init_with_key(session, shmemkey);
 
 }
 
-static void sem_init_with_key(key_t semkey) {
+static void sem_init_with_key(ipc_session session, key_t semkey) {
 
 	//Creamos los semaforos para sincronizar cliente servidor
-	if ((shmem.semid = semget(semkey, 2, 0)) >= 0 ) {
+	if ((session->semid = semget(semkey, 2, 0)) >= 0 ) {
 		//printf("Sync semaphores already exist with id: %d\n", shmem.semid);
 		return;
 	}
 
-	if ((shmem.semid = semget(semkey, 2, IPC_CREAT | 0666)) == -1 ) {
+	if ((session->semid = semget(semkey, 2, IPC_CREAT | 0666)) == -1 ) {
 		printf("shmget failed.\n");
 		exit(1);
 	}
@@ -94,26 +93,26 @@ static void sem_init_with_key(key_t semkey) {
 /*
 	Inicializa 2 semaforos para sincronizar cliente-servidor
  */
-static void sem_init() {
+static void sem_init(ipc_session session) {
 
 	key_t semkey = ftok("../database.sqlite", 0);
 
-	sem_init_with_key(semkey);
+	sem_init_with_key(session, semkey);
 
 }
 
-static void sem_queue_init() {
+static void sem_queue_init(ipc_session session) {
 
 	//El id solo usa los 8 bits menos significativos. Seteamos a FF que es la cant maxima de clientes -1 que puede aguantar el servidor
 	key_t queuekey = ftok("../database.sqlite", 0xFF);
 
 	//Creamos el semaforo para la cola de clientes
-	if ((shmem.queueid = semget(queuekey, 2, 0)) >= 0 ) {
+	if ((session->queueid = semget(queuekey, 2, 0)) >= 0 ) {
 		//printf("Queue semaphore already exist with id: %d\n", shmem.queueid);
 		return;
 	}
 
-	if ((shmem.queueid = semget(queuekey, 2, IPC_CREAT | 0666)) == -1 ) {
+	if ((session->queueid = semget(queuekey, 2, IPC_CREAT | 0666)) == -1 ) {
 		printf("shmget queue failed.\n");
 		exit(1);
 	}
@@ -132,48 +131,48 @@ static void sem_set(int semid, int semnum, int val) {
 
 }
 
-static void shmem_detach() {
+static void shmem_detach(ipc_session session) {
 
 	printf("Detaching shared memory zone...\n");
 
-	shmdt(shmem.alloc);
+	shmdt(session->alloc);
 
 }
 
 #ifdef SERVER
-static void sem_reset() {
+static void sem_reset(ipc_session session) {
 
-	sem_set(shmem.semid, SEM_CLIENT, 0);
-	sem_set(shmem.semid, SEM_SERVER, 0);
+	sem_set(session->semid, SEM_CLIENT, 0);
+	sem_set(session->semid, SEM_SERVER, 0);
 
 }
 
 /*
 	Elimina la zona de memoria compartida.
  */
-static void shmem_destroy() {
+static void shmem_destroy(ipc_session session) {
 
-	shmem_detach();
+	shmem_detach(session);
 
 	CLIPRINTE("Destroying shared memory zone...\n");
 
 	//Marcamos la memoria como eliminable
-	shmctl(shmem.memid, IPC_RMID, 0);
+	shmctl(session->memid, IPC_RMID, 0);
 
 }
 
-static void sem_destroy() {
+static void sem_destroy(ipc_session session) {
 
 	CLIPRINTE("Destroying semaphores...\n");
 
 	//Destruimos los semaforos
-	semctl(shmem.semid, 0, IPC_RMID);
+	semctl(session->semid, 0, IPC_RMID);
 
 }
 
-static void sem_queue_destroy() {
+static void sem_queue_destroy(ipc_session session) {
 
-	semctl(shmem.queueid, 0, IPC_RMID);
+	semctl(session->queueid, 0, IPC_RMID);
 
 }
 
@@ -208,94 +207,66 @@ static int get_sem_val(int semid, int semnum ) {
 	return (semctl(semid, semnum, GETVAL));
 }
 
+ipc_session ipc_newsession(){
+
+	ipc_session session = (ipc_session) malloc(sizeof(struct session_t));
+
+	return (ipc_session)session;
+
+}
+
+DB_DATAGRAM* ipc_receive(ipc_session session) {
 
 #ifdef SERVER
-/*
-	---------------------------------------------------
-	Capa de comunicacion para el SERVIDOR
-
-	---------------------------------------------------
- */
-DB_DATAGRAM* ipc_receive() {
-
-	WAIT_FOR(SEM_CLIENT); //Esperamos que mande un comando
-
-	DB_DATAGRAM *datagram, *new_datagram;
-
-	datagram = (DB_DATAGRAM*)shmem.alloc;
-	new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
-
-	memcpy(new_datagram, datagram, datagram->size);
-
-	return new_datagram;
-
-}
-
-int ipc_send(DB_DATAGRAM* data) {
-
-	if (data->size > SHMEM_SIZE) {
-		return -1;
-	}
-
-	memcpy(shmem.alloc, data, data->size);
-
-	UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
-
-	return 0;
-
-}
-
+	WAIT_FOR(SEM_CLIENT); //Esperamos que el cliente mande un comando
 #else
-/*
-	---------------------------------------------------
-	Capa de comunicacion para el CLIENTE
-
-	---------------------------------------------------
- */
-
-int ipc_send(DB_DATAGRAM* data) {
-
-	if (data->size > SHMEM_SIZE) {
-		return -1;
-	}
-
-	memcpy(shmem.alloc, data, data->size);
-
-	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
-
-	return 0;
-
-}
-
-DB_DATAGRAM* ipc_receive() {
-
-	WAIT_FOR(SEM_SERVER);
-
-	DB_DATAGRAM *datagram, *new_datagram;
-
-	datagram = (DB_DATAGRAM*)shmem.alloc;
-	new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
-
-	memcpy(new_datagram, datagram, datagram->size);
-
-	return new_datagram;
-
-}
-
+	WAIT_FOR(SEM_SERVER); //Esperamos que el servidor mande una respuesta
 #endif
 
-int ipc_listen(int argc, char** args) {
+
+	DB_DATAGRAM *datagram, *new_datagram;
+
+	datagram = (DB_DATAGRAM*)session->alloc;
+	new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
+
+	memcpy(new_datagram, datagram, datagram->size);
+
+	return new_datagram;
+
+}
+
+int ipc_send(ipc_session session, DB_DATAGRAM* data) {
+
+	if (data->size > SHMEM_SIZE) {
+		return -1;
+	}
+
+	memcpy(session->alloc, data, data->size);
+
+
+#ifdef SERVER
+	UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
+#else
+	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
+#endif
+
+	return 0;
+
+}
+
+
+int ipc_listen(ipc_session session, int argc, char** args) {
 
 	SRVPRINTE("Inicializando IPC de shared memory...\n");
 
-	shmem_init();
+	shmem_init(session);
 
-	sem_init();
-	sem_queue_init();
+	sem_init(session);
+	sem_queue_init(session);
 
 	//Inicializamos el valor del semaforo de la cola.
-	sem_set(shmem.queueid, SEM_QUEUE, 1);
-	sem_set(shmem.queueid, SEM_SRV_QUEUE, 0);
+	sem_set(session->queueid, SEM_QUEUE, 1);
+	sem_set(session->queueid, SEM_SRV_QUEUE, 0);
 
 	SRVPRINTE("Escuchando clientes...\n");
 
@@ -304,10 +275,10 @@ int ipc_listen(int argc, char** args) {
 }
 
 #ifdef SERVER
-void ipc_accept() {
+void ipc_accept(ipc_session session) {
 
 	//Reseteamos los valores de los semaforos para aceptar al nuevo cliente.
-	sem_reset();
+	sem_reset(session);
 
 	//STEP-0: Bloquea hasta que un cliente ejecute semup
 	WAIT_FOR(SEM_CLIENT);
@@ -316,7 +287,7 @@ void ipc_accept() {
 
 }
 
-void ipc_sync() {
+void ipc_sync(ipc_session session) {
 
 
 	CLIPRINTE("Fork creado, esperando pedido de memoria.\n");
@@ -324,7 +295,7 @@ void ipc_sync() {
 	//STEP-1
 	WAIT_FOR(SEM_CLIENT); //Esperamos al primer mensaje
 
-	DB_DATAGRAM *datagram = (DB_DATAGRAM*)shmem.alloc;
+	DB_DATAGRAM *datagram = (DB_DATAGRAM*)session->alloc;
 
 	if (datagram->dg_shmemkey == -1) {
 		CLIPRINTE("Pedido de zona de memoria recibido.\n");
@@ -340,17 +311,17 @@ void ipc_sync() {
 
 	datagram->dg_shmemkey = ftok("../database.sqlite", cli_count);
 
-	int oldsemid = shmem.semid;
+	int oldsemid = session->semid;
 
 	key_t shmemkey = datagram->dg_shmemkey;
 
-	shmem_detach();
+	shmem_detach(session);
 
-	shmem_init_with_key(shmemkey);
-	sem_init_with_key(shmemkey);
+	shmem_init_with_key(session, shmemkey);
+	sem_init_with_key(session, shmemkey);
 
 	//Reseteamos los nuevos semaforos
-	sem_reset();
+	sem_reset(session);
 
 	//DUMP_SHMEM_DATA()
 
@@ -373,7 +344,7 @@ void ipc_sync() {
 
 }
 
-void ipc_waitsync() {
+void ipc_waitsync(ipc_session session) {
 
 	WAIT_FOR_QUEUE(SEM_SRV_QUEUE);
 
@@ -383,16 +354,16 @@ void ipc_waitsync() {
 #endif
 
 #ifdef CLIENT
-int ipc_connect(int argc, char** args) {
+int ipc_connect(ipc_session session, int argc, char** args) {
 
 	DB_DATAGRAM *datagram;
 
 	printf("Conectando con el servidor...\n");
 
-	shmem_init();
+	shmem_init(session);
 
-	sem_init();
-	sem_queue_init();
+	sem_init(session);
+	sem_queue_init(session);
 
 	printf("Esperando en la cola...\n");
 
@@ -403,7 +374,7 @@ int ipc_connect(int argc, char** args) {
 	// STEP-0: Desbloqueamos el servidor
 	UNBLOCK(SEM_CLIENT);
 
-	datagram = (DB_DATAGRAM*) shmem.alloc;
+	datagram = (DB_DATAGRAM*) session->alloc;
 
 	datagram->size = sizeof(DB_DATAGRAM);
 	datagram->dg_shmemkey = -1;
@@ -424,10 +395,10 @@ int ipc_connect(int argc, char** args) {
 
 	key_t shmemkey = datagram->dg_shmemkey;
 
-	shmem_detach();
+	shmem_detach(session);
 
-	shmem_init_with_key(shmemkey);
-	sem_init_with_key(shmemkey);
+	shmem_init_with_key(session, shmemkey);
+	sem_init_with_key(session, shmemkey);
 
 	//DUMP_SHMEM_DATA();
 
@@ -443,23 +414,23 @@ int ipc_connect(int argc, char** args) {
 #endif
 
 
-void ipc_disconnect() {
+void ipc_disconnect(ipc_session session) {
 
 	printf("Disconnecting...\n");
 
 #ifdef SERVER
-	shmem_destroy();
-	sem_destroy();
+	shmem_destroy(session);
+	sem_destroy(session);
 #else
-	shmem_detach();
+	shmem_detach(session);
 #endif
 
 }
 
 #ifdef SERVER
-void ipc_free() {
+void ipc_free(ipc_session session) {
 
-	sem_queue_destroy();
+	sem_queue_destroy(session);
 
 }
 #endif
