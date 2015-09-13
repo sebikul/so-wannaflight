@@ -10,9 +10,11 @@
 
 #define BUFFER_SIZE 50
 
+static ipc_session session;
+
 void int_handler(int s) {
 	printf("Cleaning up before exit!\n");
-	ipc_disconnect();
+	ipc_disconnect(session);
 	exit(0);
 }
 
@@ -30,7 +32,7 @@ static void send_cmd(char* cmd, int n) {
 
 	printf("Enviando comando: %s\n", datagram->dg_cmd);
 
-	ipc_send(datagram);
+	ipc_send(session, datagram);
 
 	free(datagram);
 }
@@ -43,9 +45,11 @@ int main(int argc, char** argv) {
 
 	printf("Starting client...\n");
 
-	signal(SIGINT, int_handler);
+	//signal(SIGINT, int_handler);
 
-	err = ipc_connect(argc - 1, ++argv);
+	session = ipc_newsession();
+
+	err = ipc_connect(session, argc - 1, ++argv);
 
 	if (err == -1) {
 		fprintf(stderr, "Invalid argument count.\n");
@@ -58,7 +62,7 @@ int main(int argc, char** argv) {
 
 		send_cmd(buffer, n);
 
-		datagram = ipc_receive();
+		datagram = ipc_receive(session);
 
 		printf("Respuesta: %s\n", datagram->dg_cmd);
 
@@ -70,7 +74,7 @@ int main(int argc, char** argv) {
 	}
 
 	printf("Disconnecting\n");
-	ipc_disconnect();
+	ipc_disconnect(session);
 
 	return 0;
 

@@ -10,10 +10,12 @@
 
 int cli_count = 0;
 
+static ipc_session session;
+
 void int_handler(int s) {
 	printf("Cleaning up before exit!\n");
-	ipc_disconnect();
-	ipc_free();
+	ipc_disconnect(session);
+	ipc_free(session);
 	exit(0);
 }
 
@@ -25,7 +27,7 @@ void serve() {
 
 	while (1) {
 
-		DB_DATAGRAM* dg = ipc_receive();
+		DB_DATAGRAM* dg = ipc_receive(session);
 		//DUMP_DATAGRAM(dg);
 
 		CLIPRINT("Mensaje recibido: %s\n", dg->dg_cmd);
@@ -35,12 +37,12 @@ void serve() {
 			CLIPRINTE("Exit command received!\n");
 			dg->opcode = OP_EXIT;
 
-			ipc_send(dg);
+			ipc_send(session, dg);
 
 			free(dg);
 			CLIPRINTE("Cliente desconectado. Limpiando...\n");
 
-			ipc_disconnect();
+			ipc_disconnect(session);
 
 			exit(0);
 		}
@@ -51,7 +53,7 @@ void serve() {
 		CLIPRINT("Enviando respuesta: %s\n", dg->dg_cmd);
 
 		//DUMP_DATAGRAM(dg);
-		ipc_send(dg);
+		ipc_send(session, dg);
 
 		free(dg);
 
@@ -66,9 +68,11 @@ int main(int argc, char** argv) {
 
 	printf("Starting server...\n");
 
-	signal(SIGINT, int_handler);
+	//signal(SIGINT, int_handler);
 
-	err = ipc_listen(argc - 1, ++argv);
+	session = ipc_newsession();
+
+	err = ipc_listen(session, argc - 1, ++argv);
 
 	if (err == -1) {
 		fprintf(stderr, "Invalid argument count.\n");
@@ -77,7 +81,7 @@ int main(int argc, char** argv) {
 
 	while (1) {
 
-		ipc_accept();
+		ipc_accept(session);
 
 		cli_count++;
 
@@ -89,7 +93,7 @@ int main(int argc, char** argv) {
 			break;
 
 		case 0: /* hijo */
-			ipc_sync();
+			ipc_sync(session);
 			serve();
 
 			break;
@@ -98,7 +102,7 @@ int main(int argc, char** argv) {
 
 			//En caso de ser necesario, esperamos que el cliente termine de
 			//sincronizar con el servidor para aceptar el proximo cliente.
-			ipc_waitsync();
+			ipc_waitsync(session);
 
 			printf("Cliente aceptado. Esperando mas clientes...\n");
 
