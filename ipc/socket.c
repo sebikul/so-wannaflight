@@ -11,19 +11,28 @@
 #include "ipc.h"
 
 #ifdef SERVER
-static int srvsocketfd;
 extern int cli_count;
 #endif
 
-typedef struct {
-	int clientfd;
-	struct sockaddr_in cli_addr;
-} SOCK_CLIENT;
+struct session_t{
+	int serverfd;
 
-static SOCK_CLIENT sock_client;
+	int otherfd;
+	struct sockaddr_in cli_addr;
+
+	char* client_ip;
+};
+
+ipc_session ipc_newsession(){
+
+	ipc_session session = (ipc_session) malloc(sizeof(struct session_t));
+
+	return (ipc_session)session;
+
+}
 
 #ifdef SERVER
-int ipc_listen(int argc, char** args) {
+int ipc_listen(ipc_session session, int argc, char** args) {
 
 	int port;
 
@@ -35,7 +44,7 @@ int ipc_listen(int argc, char** args) {
 
 	port = atoi(args[0]);
 
-	srvsocketfd = socket(AF_INET, SOCK_STREAM, 0);
+	session->serverfd = socket(AF_INET, SOCK_STREAM, 0);
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -43,43 +52,43 @@ int ipc_listen(int argc, char** args) {
 
 	SRVPRINT("Binding network interface to port %d\n", port);
 
-	bind(srvsocketfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+	bind(session->serverfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
 
-	listen(srvsocketfd, SOCKET_BACKLOG);
+	listen(session->serverfd, SOCKET_BACKLOG);
 
 	return 0;
 
 }
 
-void ipc_accept() {
+void ipc_accept(ipc_session session) {
 
 	int size = sizeof(struct sockaddr_in);
 
 	SRVPRINTE("Listening to connections...\n");
 
-	sock_client.clientfd = accept(srvsocketfd, (struct sockaddr*)&sock_client.cli_addr, (socklen_t*)&size);
+	session->otherfd = accept(session->serverfd, (struct sockaddr*)&session->cli_addr, (socklen_t*)&size);
 
 }
 
-void ipc_sync() {
+void ipc_sync(ipc_session session) {
 
-	char *client_ip = inet_ntoa(sock_client.cli_addr.sin_addr);
+	session->client_ip = inet_ntoa(session->cli_addr.sin_addr);
 
-	SRVPRINT("Cliente %s conectado, esperando datos.\n", client_ip);
+	SRVPRINT("Cliente %s conectado, esperando datos.\n", session->client_ip);
 
 }
 
-void ipc_waitsync() {
+void ipc_waitsync(ipc_session session) {
 
 	//Desconectamos el cliente del proceso padre, solo el
 	//hijo necesita el fd del socket nuevo.
-	ipc_disconnect();
+	ipc_disconnect(session);
 
 }
 #endif
 
 #ifdef CLIENT
-int ipc_connect(int argc, char** args) {
+int ipc_connect(ipc_session session, int argc, char** args) {
 
 	struct sockaddr_in server;
 	int port;
@@ -89,8 +98,8 @@ int ipc_connect(int argc, char** args) {
 	}
 
 	//Create socket
-	sock_client.clientfd = socket(AF_INET , SOCK_STREAM , 0);
-	if (sock_client.clientfd == -1) {
+	session->otherfd = socket(AF_INET , SOCK_STREAM , 0);
+	if (session->otherfd == -1) {
 		printf("Could not create socket");
 	}
 
@@ -103,7 +112,7 @@ int ipc_connect(int argc, char** args) {
 	server.sin_port = htons(port);
 
 	//Connect to remote server
-	if (connect(sock_client.clientfd , (struct sockaddr *)&server, sizeof(server)) < 0) {
+	if (connect(session->otherfd , (struct sockaddr *)&server, sizeof(server)) < 0) {
 		puts("connect error");
 		return 1;
 	}
@@ -118,22 +127,22 @@ int ipc_connect(int argc, char** args) {
 #endif
 
 
-int ipc_send(DB_DATAGRAM* data) {
+int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 
 	//Send the message back to client
-	write(sock_client.clientfd , data , data->size);
+	write(session->otherfd , data , data->size);
 
 	return 0;
 
 }
 
-DB_DATAGRAM* ipc_receive() {
+DB_DATAGRAM* ipc_receive(ipc_session session) {
 
 	int size;
 	DB_DATAGRAM* datagram = (DB_DATAGRAM*)malloc(DATAGRAM_MAXSIZE);
 
 	//Receive a message from client
-	size = recv(sock_client.clientfd , datagram , DATAGRAM_MAXSIZE , 0);
+	size = recv(session->otherfd , datagram , DATAGRAM_MAXSIZE , 0);
 
 	if (size > 0) {
 
@@ -151,13 +160,13 @@ DB_DATAGRAM* ipc_receive() {
 
 }
 
-void ipc_disconnect() {
+void ipc_disconnect(ipc_session session) {
 
-	close(sock_client.clientfd);
-	sock_client.clientfd = 0;
+	close(session->otherfd);
+	session->otherfd = 0;
 
 }
 
-void ipc_free() {
+void ipc_free(ipc_session session) {
 
 }
