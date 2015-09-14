@@ -43,6 +43,7 @@ void serve() {
 			CLIPRINTE("Cliente desconectado. Limpiando...\n");
 
 			ipc_disconnect(session);
+			ipc_free(session);
 
 			exit(0);
 		}

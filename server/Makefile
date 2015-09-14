@@ -1,5 +1,5 @@
 
-GCCFLAGS=-Wall -g -DSERVER -I../include sqlite3/sqlite3.o server.c 
+GCCFLAGS=-Wall -ggdb -DSERVER -I../include sqlite3/sqlite3.o server.c 
 
 .PHONY: all clean sqlite3 socket shmem
 

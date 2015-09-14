@@ -76,6 +76,8 @@ int main(int argc, char** argv) {
 	printf("Disconnecting\n");
 	ipc_disconnect(session);
 
+	ipc_free(session);
+
 	return 0;
 
 }
