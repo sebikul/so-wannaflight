@@ -165,4 +165,6 @@ void ipc_disconnect(ipc_session session) {
 
 void ipc_free(ipc_session session) {
 
+	free(session);
+
 }
