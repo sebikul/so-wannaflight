@@ -47,7 +47,7 @@ typedef struct __attribute__((packed)) {
 	airport_id destination;
 } DB_ENTRY;
 
-typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT} OPCODE;
+typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT, OP_CONNECT} OPCODE;
 
 typedef struct {
 

@@ -426,7 +426,7 @@ void ipc_free(ipc_session session) {
 	sem_queue_destroy(session);
 #endif
 
-	free(session)
+	free(session);
 
 }
 
