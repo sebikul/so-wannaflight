@@ -6,7 +6,6 @@
 #define SRVPRINTE(msg) 		printf("[SERVER] " msg)
 #define SRVPRINT(msg, ...) 	printf("[SERVER] " msg, __VA_ARGS__)
 
-
 struct session_t;
 
 typedef struct session_t* ipc_session;

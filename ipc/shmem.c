@@ -5,14 +5,12 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <string.h>
-
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
 
 #define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(session->semid, SEM_CLIENT), get_sem_val(session->emid, SEM_SERVER))
 #define PRINT_QSEM_VALUES 	printf("SEM_QUEUE: %d\nSEM_SRV_QUEUE: %d\n", get_sem_val(session->queueid, SEM_QUEUE), get_sem_val(session->queueid, SEM_SRV_QUEUE))
-
 
 #define SEM_QUEUE			0
 #define SEM_SRV_QUEUE		1
@@ -25,7 +23,6 @@
 
 #define WAIT_FOR_QUEUE(sem) sem_down(session->queueid, sem)
 #define UNBLOCK_QUEUE(sem) 	sem_up(session->queueid, sem)
-
 
 struct session_t{
 	
@@ -118,7 +115,6 @@ static void sem_queue_init(ipc_session session) {
 	}
 
 	//printf("Initialized queue semaphores with id %d\n", shmem.queueid);
-
 
 }
 
@@ -243,7 +239,6 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 
 	memcpy(session->alloc, data, data->size);
 
-
 #ifdef SERVER
 	UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
 #else
@@ -253,7 +248,6 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 	return 0;
 
 }
-
 
 int ipc_listen(ipc_session session, int argc, char** args) {
 
@@ -350,7 +344,6 @@ void ipc_waitsync(ipc_session session) {
 
 }
 
-
 #endif
 
 #ifdef CLIENT
@@ -412,7 +405,6 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 }
 
 #endif
-
 
 void ipc_disconnect(ipc_session session) {
 

@@ -1,6 +1,4 @@
-
 GCCFLAGS=-Wall -g -DCLIENT -I../include client.c
-
 
 .PHONY: all clean shmem socket
 
