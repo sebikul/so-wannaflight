@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
-
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
@@ -121,7 +120,6 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 }
 #endif
-
 
 int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 

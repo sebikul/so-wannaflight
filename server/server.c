@@ -19,7 +19,6 @@ void int_handler(int s) {
 	exit(0);
 }
 
-
 void serve() {
 
 	static char* mensaje = "Mensaje recibido";
