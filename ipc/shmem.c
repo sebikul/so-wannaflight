@@ -25,7 +25,7 @@
 #define UNBLOCK_QUEUE(sem) 	sem_up(session->queueid, sem)
 
 struct session_t{
-	
+
 	int clientid;
 
 	int semid;
@@ -419,10 +419,14 @@ void ipc_disconnect(ipc_session session) {
 
 }
 
-#ifdef SERVER
+
 void ipc_free(ipc_session session) {
 
+#ifdef SERVER
 	sem_queue_destroy(session);
+#endif
+
+	free(session)
 
 }
-#endif
+

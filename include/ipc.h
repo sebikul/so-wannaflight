@@ -65,5 +65,6 @@ void ipc_disconnect(ipc_session session);
 
 /**
  * Método que permite liberar los recursos usados por el servidor.
+ * Luego de la llamada a este método, _session_ no es un puntero valido.
  */
 void ipc_free(ipc_session session);
