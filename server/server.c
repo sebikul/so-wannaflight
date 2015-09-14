@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 
 	printf("Starting server...\n");
 
-	//signal(SIGINT, int_handler);
+	signal(SIGINT, int_handler);
 
 	session = ipc_newsession();
 

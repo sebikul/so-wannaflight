@@ -6,12 +6,12 @@ sqlite3 *db;
 res_id purchase(flight_id id){
     
     char* sql;
-    fprintf(sql,"SELECT * from FLIGHT where ID = %d",id);
+    sprintf(sql,"SELECT COUNT(*) from TICKET where ID = %d",id);
     exec(sql);  
 
     //TODO check if flight_id exist
     /*
-    if(result!=NULL){
+    if(result< MAX && result > 0){
         add_ticket(id, RESERVATION_ID);
         RESERVATION_ID++; //GLOBAL VAR
     }
@@ -21,7 +21,7 @@ res_id purchase(flight_id id){
 DB_DATAGRAM consult_flights(airport_id origin, airport_id destination){
 
     char* sql;
-    fprintf(sql,"SELECT * from FLIGHT where ORIGIN = %d AND DESTINY = %d",origin, destination);
+    sprintf(sql,"SELECT * from FLIGHT where ORIGIN = %d AND DESTINY = %d",origin, destination);
     exec(sql);
     
     //TODO work with callback result
@@ -29,7 +29,7 @@ DB_DATAGRAM consult_flights(airport_id origin, airport_id destination){
 
 bool cancel(res_id id){
     char* sql;
-    fprintf(sql,"SELECT ID from TICKET where RESID = %d", id);
+    sprintf(sql,"SELECT ID from TICKET where RESID = %d", id);
     exec(sql);
 
     //TODO search matching flightID from resID (only 1 result)
@@ -43,7 +43,7 @@ bool cancel(res_id id){
 void add_flight(int flight_id, time_t ftime, int origin, int destination){
 
     char* sql;
-    fprintf(sql,"INSERT INTO FLIGHT (ID,TIME,ORIGIN,DESTINY) "  \
+    sprintf(sql,"INSERT INTO FLIGHT (ID,TIME,ORIGIN,DESTINY) "  \
          "VALUES (%d,%d,%d,%d);", flight_id,ftime,origin,destination);
 
     exec(sql);
@@ -52,7 +52,7 @@ void add_flight(int flight_id, time_t ftime, int origin, int destination){
 void add_ticket(int flight_id, int reservation_id){
 
     char* sql;
-    fprintf(sql,"INSERT INTO TICKET (RESID, ID) "  \
+    sprintf(sql,"INSERT INTO TICKET (RESID, ID) "  \
          "VALUES (%d,%d);", reservation_id, flight_id);
 
     exec(sql);
@@ -61,7 +61,7 @@ void add_ticket(int flight_id, int reservation_id){
 void remove_ticket(int reservation_id){
 
     char* sql;
-    fprintf(sql,"DELETE FROM TICKET where RESID = %d;", reservation_id);
+    sprintf(sql,"DELETE FROM TICKET where RESID = %d;", reservation_id);
 
     exec(sql);
 }
