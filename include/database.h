@@ -13,11 +13,11 @@
 #define dg_cmd			_raw_data._cmd
 #define dg_results		_raw_data._results
 
-#define DUMP_DBENTRY(entry)			printf("Flight ID: %d\nDeparture: %lld\nOrigin: %d\n Destination: %d",\
+#define DUMP_DBENTRY(entry)			printf("Vuelo ID: %d\nSalida: %lld\nOrigen: %d\nDestino: %d",\
 										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
 
 #define DUMP_DATAGRAM(datagram)		{\
-										printf("\nSize: %zu\nopcode: %d\nCount: %d\nSeat: %d\nResult: %s\nCMD: %s\n\n",\
+										printf("\nTamaño: %zu\nopcode: %d\nCantidad: %d\nAsiento: %d\nResultado: %s\nCMD: %s\n\n",\
 											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",datagram->dg_cmd);\
 									}
 

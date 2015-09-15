@@ -13,7 +13,7 @@ int cli_count = 0;
 static ipc_session session;
 
 void int_handler(int s) {
-	printf("Cleaning up before exit!\n");
+	printf("Limpiando antes de salir!\n");
 	ipc_disconnect(session);
 	ipc_free(session);
 	exit(0);
@@ -33,7 +33,7 @@ void serve() {
 
 		if (strcmp(dg->dg_cmd, "exit") == 0) {
 
-			CLIPRINTE("Exit command received!\n");
+			CLIPRINTE("Comando de salida recibido!\n");
 			dg->opcode = OP_EXIT;
 
 			ipc_send(session, dg);

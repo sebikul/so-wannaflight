@@ -100,7 +100,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 	port = atoi(args[1]);
 
-	printf("Connecting to %s:%d\n", args[0], port);
+	printf("Conectando a %s:%d\n", args[0], port);
 
 	server.sin_addr.s_addr = inet_addr(args[0]);
 	server.sin_family = AF_INET;
@@ -112,7 +112,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 		return 1;
 	}
 
-	printf("Connected\n");
+	printf("Conectado\n");
 
 	printf("Listo para enviar comandos...\n");
 

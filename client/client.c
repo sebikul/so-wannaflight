@@ -12,7 +12,7 @@
 static ipc_session session;
 
 void int_handler(int s) {
-	printf("Cleaning up before exit!\n");
+	printf("Limpiando antes de desconectar.\n");
 	ipc_disconnect(session);
 	exit(0);
 }
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 	int n, err;
 	DB_DATAGRAM *datagram;
 
-	printf("Starting client...\n");
+	printf("Iniciando cliente...\n");
 
 	//signal(SIGINT, int_handler);
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 	err = ipc_connect(session, argc - 1, ++argv);
 
 	if (err == -1) {
-		fprintf(stderr, "Invalid argument count.\n");
+		fprintf(stderr, "Cantidad de argumentos invalida.\n");
 		exit(1);
 	}
 
@@ -66,13 +66,13 @@ int main(int argc, char** argv) {
 		printf("Respuesta: %s\n", datagram->dg_cmd);
 
 		if (datagram->opcode == OP_EXIT) {
-			printf("Exiting...\n");
+			printf("Saliendo...\n");
 			break;
 		}
 
 	}
 
-	printf("Disconnecting\n");
+	printf("Desconectando\n");
 	ipc_disconnect(session);
 
 	ipc_free(session);

@@ -55,7 +55,7 @@ static void shmem_init_with_key(ipc_session session, key_t shmemkey) {
 
 	memset(session->alloc, 0, SHMEM_SIZE);
 
-	//printf("Initialized shared memory zone with id %d\n", shmem.memid);
+	//printf("Shared memory inicializado con id %d\n", shmem.memid);
 
 }
 
