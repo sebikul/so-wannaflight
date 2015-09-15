@@ -50,9 +50,7 @@ typedef struct __attribute__((packed)) {
 typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT, OP_CONNECT} OPCODE;
 
 typedef struct {
-
 	size_t size;
-
 	OPCODE opcode;
 
 	union {
