@@ -6,20 +6,6 @@
 #include <time.h>
 
 #define FLIGHT_SIZE 32
-#define dg_count 		_data._count
-#define dg_seat 		_data._seat
-#define dg_result 		_data._result
-#define dg_shmemkey 	_data._shmemkey
-#define dg_cmd			_raw_data._cmd
-#define dg_results		_raw_data._results
-
-#define DUMP_DBENTRY(entry)			printf("Vuelo ID: %d\nSalida: %lld\nOrigen: %d\nDestino: %d",\
-										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
-
-#define DUMP_DATAGRAM(datagram)		{\
-										printf("\nTamaño: %zu\nopcode: %d\nCantidad: %d\nAsiento: %d\nResultado: %s\nCMD: %s\n\n",\
-											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",datagram->dg_cmd);\
-									}
 
 //TODO alinear los datos a palabra.
 
@@ -67,10 +53,26 @@ typedef struct {
 
 } DB_DATAGRAM;
 
-//for(int __i = 0;__i<datagram->dg_count;__i++){\
-//	DUMP_DBENTRY(datagram->dg_results[__i]);\
-//}\
-//}
+#define dg_count 		_data._count
+#define dg_seat 		_data._seat
+#define dg_result 		_data._result
+#define dg_shmemkey 	_data._shmemkey
+
+#define dg_cmd			_raw_data._cmd
+#define dg_results		_raw_data._results
+
+
+#define DUMP_DBENTRY(entry)			printf("Vuelo ID: %d\nSalida: %lld\nOrigen: %d\nDestino: %d",\
+										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
+
+#define DUMP_DATAGRAM(datagram)		{\
+										printf("\nTamaño: %zu\nopcode: %d\nCantidad: %d\nAsiento: %d\nResultado: %s\nCMD: %s\n\n",\
+											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",datagram->dg_cmd);\
+									}
+									//for(int __i = 0;__i<datagram->dg_count;__i++){\
+									//	DUMP_DBENTRY(datagram->dg_results[__i]);\
+									//}\
+									//}
 
 res_id purchase(flight_id id);
 

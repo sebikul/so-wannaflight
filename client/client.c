@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include "config.h"
 #include "ipc.h"
 #include "database.h"
@@ -30,21 +31,28 @@ static void send_cmd(char* cmd, int n) {
 }
 
 int main(int argc, char** argv) {
+
 	char buffer[SHMEM_SIZE] = {0};
 	int n, err;
 	DB_DATAGRAM *datagram;
+
 	system("clear");
 	printf("Iniciando cliente...\n");
+
 	//signal(SIGINT, int_handler);
 	session = ipc_newsession();
 	err = ipc_connect(session, argc - 1, ++argv);
+
 	if (err == -1) {
 		fprintf(stderr, "Cantidad de argumentos invalida.\n");
 		exit(1);
 	}
+
 	printf("-----------------------------------------------------------------\n");
 	printf("Los comandos disponibles son: consultar, comprar, cancelar, salir\n");
+
 	while ((n = read(0, buffer, SHMEM_SIZE)) > 0 ) {
+		
 		buffer[n - 1] = 0;
 		send_cmd(buffer, n);
 		datagram = ipc_receive(session);

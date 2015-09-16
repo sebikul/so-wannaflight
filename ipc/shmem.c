@@ -5,6 +5,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <string.h>
+
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
@@ -24,7 +25,7 @@
 #define WAIT_FOR_QUEUE(sem) sem_down(session->queueid, sem)
 #define UNBLOCK_QUEUE(sem) 	sem_up(session->queueid, sem)
 
-struct session_t{
+struct session_t {
 
 	int clientid;
 
@@ -203,7 +204,7 @@ static int get_sem_val(int semid, int semnum ) {
 	return (semctl(semid, semnum, GETVAL));
 }
 
-ipc_session ipc_newsession(){
+ipc_session ipc_newsession() {
 
 	ipc_session session = (ipc_session) malloc(sizeof(struct session_t));
 

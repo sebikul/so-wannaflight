@@ -5,11 +5,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
 
-struct session_t{
+struct session_t {
 	int serverfd;
 
 	int otherfd;
@@ -18,7 +19,7 @@ struct session_t{
 	char* client_ip;
 };
 
-ipc_session ipc_newsession(){
+ipc_session ipc_newsession() {
 
 	ipc_session session = (ipc_session) malloc(sizeof(struct session_t));
 
