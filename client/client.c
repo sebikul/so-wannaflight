@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	system("clear");
 	printf("Iniciando cliente...\n");
 
-	//signal(SIGINT, int_handler);
+	signal(SIGINT, int_handler);
 	session = ipc_newsession();
 	err = ipc_connect(session, argc - 1, ++argv);
 
