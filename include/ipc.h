@@ -1,5 +1,8 @@
 #include "database.h"
 
+#ifndef IPC_H
+#define IPC_H
+
 #define CLIPRINTE(msg) 		printf("[CLIENT #%d] " msg, cli_count)
 #define CLIPRINT(msg, ...) 	printf("[CLIENT #%d] " msg, cli_count, __VA_ARGS__)
 
@@ -68,3 +71,6 @@ void ipc_disconnect(ipc_session session);
  * Luego de la llamada a este método, _session_ no es un puntero valido.
  */
 void ipc_free(ipc_session session);
+
+
+#endif

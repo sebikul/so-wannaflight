@@ -11,13 +11,13 @@ sqlite3:
 	cd sqlite3; make all
 
 shmem: sqlite3
-	gcc $(GCCFLAGS) -o server-shmem ../ipc/shmem.c 
+	gcc $(GCCFLAGS) -o server-shmem ../ipc/shmem.c ../ipc/lib/semaphore.c
 
 socket: sqlite3
 	gcc $(GCCFLAGS) -o server-socket ../ipc/socket.c
 
 fifo: sqlite3
-	gcc $(GCCFLAGS) -o server-fifo ../ipc/fifo.c
+	gcc $(GCCFLAGS) -o server-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
 
 clean: 
 	cd sqlite3; make clean
