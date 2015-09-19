@@ -2,28 +2,13 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ipc.h>
-#include <sys/sem.h>
 #include <sys/shm.h>
 #include <string.h>
 
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
-
-#define PRINT_SEM_VALUES 	printf("SEM_CLIENT: %d\nSEM_SERVER: %d\n", get_sem_val(session->semid, SEM_CLIENT), get_sem_val(session->emid, SEM_SERVER))
-#define PRINT_QSEM_VALUES 	printf("SEM_QUEUE: %d\nSEM_SRV_QUEUE: %d\n", get_sem_val(session->queueid, SEM_QUEUE), get_sem_val(session->queueid, SEM_SRV_QUEUE))
-
-#define SEM_QUEUE			0
-#define SEM_SRV_QUEUE		1
-
-#define SEM_SERVER 			0
-#define SEM_CLIENT 			1
-
-#define WAIT_FOR(sem) 		sem_down(session->semid, sem)
-#define UNBLOCK(sem)		sem_up(session->semid, sem)
-
-#define WAIT_FOR_QUEUE(sem) sem_down(session->queueid, sem)
-#define UNBLOCK_QUEUE(sem) 	sem_up(session->queueid, sem)
+#include "semaphore.h"
 
 struct session_t {
 
@@ -71,63 +56,6 @@ static void shmem_init(ipc_session session) {
 
 }
 
-static void sem_init_with_key(ipc_session session, key_t semkey) {
-
-	//Creamos los semaforos para sincronizar cliente servidor
-	if ((session->semid = semget(semkey, 2, 0)) >= 0 ) {
-		//printf("Sync semaphores already exist with id: %d\n", shmem.semid);
-		return;
-	}
-
-	if ((session->semid = semget(semkey, 2, IPC_CREAT | 0666)) == -1 ) {
-		printf("shmget failed.\n");
-		exit(1);
-	}
-
-	//printf("Initialized sync semaphores with id %d\n", shmem.semid);
-
-}
-
-/*
-	Inicializa 2 semaforos para sincronizar cliente-servidor
- */
-static void sem_init(ipc_session session) {
-
-	key_t semkey = ftok("../database.sqlite", 0);
-
-	sem_init_with_key(session, semkey);
-
-}
-
-static void sem_queue_init(ipc_session session) {
-
-	//El id solo usa los 8 bits menos significativos. Seteamos a FF que es la cant maxima de clientes -1 que puede aguantar el servidor
-	key_t queuekey = ftok("../database.sqlite", 0xFF);
-
-	//Creamos el semaforo para la cola de clientes
-	if ((session->queueid = semget(queuekey, 2, 0)) >= 0 ) {
-		//printf("Queue semaphore already exist with id: %d\n", shmem.queueid);
-		return;
-	}
-
-	if ((session->queueid = semget(queuekey, 2, IPC_CREAT | 0666)) == -1 ) {
-		printf("shmget queue failed.\n");
-		exit(1);
-	}
-
-	//printf("Initialized queue semaphores with id %d\n", shmem.queueid);
-
-}
-
-/*
-	Setea el valor del semaforo _sem_ a _val_
- */
-static void sem_set(int semid, int semnum, int val) {
-
-	semctl(semid, semnum, SETVAL, val);
-
-}
-
 static void shmem_detach(ipc_session session) {
 
 	printf("Detaching shared memory zone...\n");
@@ -157,52 +85,7 @@ static void shmem_destroy(ipc_session session) {
 	shmctl(session->memid, IPC_RMID, 0);
 
 }
-
-static void sem_destroy(ipc_session session) {
-
-	CLIPRINTE("Destroying semaphores...\n");
-
-	//Destruimos los semaforos
-	semctl(session->semid, 0, IPC_RMID);
-
-}
-
-static void sem_queue_destroy(ipc_session session) {
-
-	semctl(session->queueid, 0, IPC_RMID);
-
-}
-
 #endif
-/*
-	Ejecuta down sobre el semaforo
- */
-static void sem_down(int semid, int semnum) {
-
-	struct sembuf sb;
-
-	sb.sem_num = semnum;
-	sb.sem_op = -1;
-	sb.sem_flg = SEM_UNDO;
-	semop(semid, &sb, 1);
-}
-
-/*
-	Ejecuta un up sobre el semaforo
- */
-static void sem_up(int semid, int semnum) {
-
-	struct sembuf sb;
-
-	sb.sem_num = semnum;
-	sb.sem_op = 1;
-	sb.sem_flg = SEM_UNDO;
-	semop(semid, &sb, 1);
-}
-
-static int get_sem_val(int semid, int semnum ) {
-	return (semctl(semid, semnum, GETVAL));
-}
 
 ipc_session ipc_newsession() {
 
@@ -256,8 +139,8 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 
 	shmem_init(session);
 
-	sem_init(session);
-	sem_queue_init(session);
+	sem_init(&session->semid, 2);
+	sem_queue_init(&session->queueid, 2);
 
 	//Inicializamos el valor del semaforo de la cola.
 	sem_set(session->queueid, SEM_QUEUE, 1);
@@ -313,7 +196,7 @@ void ipc_sync(ipc_session session) {
 	shmem_detach(session);
 
 	shmem_init_with_key(session, shmemkey);
-	sem_init_with_key(session, shmemkey);
+	sem_init_with_key(&session->semid, shmemkey, 2);
 
 	//Reseteamos los nuevos semaforos
 	sem_reset(session);
@@ -356,8 +239,8 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 	shmem_init(session);
 
-	sem_init(session);
-	sem_queue_init(session);
+	sem_init(&session->semid, 2);
+	sem_queue_init(&session->queueid, 2);
 
 	printf("Esperando en la cola...\n");
 
@@ -392,7 +275,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	shmem_detach(session);
 
 	shmem_init_with_key(session, shmemkey);
-	sem_init_with_key(session, shmemkey);
+	sem_init_with_key(&session->semid, shmemkey, 2);
 
 	//DUMP_SHMEM_DATA();
 
@@ -413,7 +296,7 @@ void ipc_disconnect(ipc_session session) {
 
 #ifdef SERVER
 	shmem_destroy(session);
-	sem_destroy(session);
+	sem_destroy(session->semid);
 #else
 	shmem_detach(session);
 #endif
@@ -424,7 +307,7 @@ void ipc_disconnect(ipc_session session) {
 void ipc_free(ipc_session session) {
 
 #ifdef SERVER
-	sem_queue_destroy(session);
+	sem_queue_destroy(session->queueid);
 #endif
 
 	free(session);
