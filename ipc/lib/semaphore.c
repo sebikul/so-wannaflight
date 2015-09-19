@@ -2,13 +2,14 @@
 #include <sys/ipc.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "semaphore.h"
 
 void sem_init_with_key(int* semid, key_t semkey, int n) {
 
 	//Creamos los semaforos para sincronizar cliente servidor
 	if ((*semid = semget(semkey, n, 0)) >= 0 ) {
-		//printf("Sync semaphores already exist with id: %d\n", shmem.semid);
+		//printf("Sync semaphores already exist with id: %d\n", *semid);
 		return;
 	}
 
@@ -17,7 +18,7 @@ void sem_init_with_key(int* semid, key_t semkey, int n) {
 		exit(1);
 	}
 
-	//printf("Initialized sync semaphores with id %d\n", shmem.semid);
+	//printf("Initialized sync semaphores with id %d\n", *semid);
 
 }
 
@@ -37,7 +38,7 @@ void sem_queue_init(int* queueid, int n) {
 
 	//Creamos el semaforo para la cola de clientes
 	if ((*queueid = semget(queuekey, n, 0)) >= 0 ) {
-		//printf("Queue semaphore already exist with id: %d\n", shmem.queueid);
+		//printf("Queue semaphore already exist with id: %d\n", *queueid);
 		return;
 	}
 

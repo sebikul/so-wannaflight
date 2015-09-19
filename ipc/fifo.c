@@ -280,4 +280,7 @@ void ipc_free(ipc_session session) {
 
 	free(session);
 
+	sem_queue_destroy(session->queueid);
+
+
 }
