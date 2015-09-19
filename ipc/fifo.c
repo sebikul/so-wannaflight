@@ -64,6 +64,12 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 		fprintf(stderr, "Error al crear el FIFO en " FIFO_INITIAL_PATH "-w" "\n");
 	}
 
+	session->path_r = malloc(strlen(FIFO_INITIAL_PATH "-r") + 1);
+	strcpy(session->path_r, FIFO_INITIAL_PATH "-r");
+
+	session->path_w = malloc(strlen(FIFO_INITIAL_PATH "-w") + 1);
+	strcpy(session->path_w, FIFO_INITIAL_PATH "-w");
+
 	return 0;
 }
 
@@ -137,11 +143,13 @@ void ipc_sync(ipc_session session) {
 	//Bloquea en el open hasta que el cliente se conecte al nuevo FIFO.
 	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_w);
 	session->serverfd_w = open(newpath_w, O_WRONLY);
+	free(session->path_w);
 	session->path_w = malloc(strlen(newpath_w) + 1);
 	strcpy(session->path_w, newpath_w);
 
 	printf("Abriendo nuevo FIFO de lectura: %s\n", newpath_r);
 	session->serverfd_r = open(newpath_r, O_RDONLY);
+	free(session->path_r);
 	session->path_r = malloc(strlen(newpath_r) + 1);
 	strcpy(session->path_r, newpath_r);
 
