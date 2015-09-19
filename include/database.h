@@ -47,7 +47,7 @@ typedef struct {
 	} _data;
 
 	union {
-		DB_ENTRY* 	_results;
+		DB_ENTRY 	_results[1];
 		char 		_cmd[1];
 	} _raw_data;
 
@@ -62,21 +62,27 @@ typedef struct {
 #define dg_results		_raw_data._results
 
 
-#define DUMP_DBENTRY(entry)			printf("Vuelo ID: %d\nSalida: %lld\nOrigen: %d\nDestino: %d",\
+#define DUMP_DBENTRY(entry)			printf("[DB_ENTRY][\n\t\tVuelo ID: %d\n\t\tSalida: %lld\n\t\tOrigen: %d\n\t\tDestino: %d\n]\n",\
 										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
 
-#define DUMP_DATAGRAM(datagram)		{\
-										printf("\nTamaño: %zu\nopcode: %d\nCantidad: %d\nAsiento: %d\nResultado: %s\nCMD: %s\n\n",\
+#define DUMP_DATAGRAM(datagram)		printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n\tCantidad: %d\n\tAsiento: %d\n\tResultado: %s\n\tCMD: %s\n]\n",\
 											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",datagram->dg_cmd);\
-									}
-									//for(int __i = 0;__i<datagram->dg_count;__i++){\
-									//	DUMP_DBENTRY(datagram->dg_results[__i]);\
-									//}\
-									//}
+
+
+#define DUMP_RESULT_DATAGRAM(datagram)	{\
+											DUMP_DATAGRAM(datagram)\
+											for(int i = 0; i < datagram->dg_count; i++){\
+												DUMP_DBENTRY(datagram->dg_results[i]);\
+											}\
+										}
+
+int db_open(const char* path);
+
+void db_close();
 
 res_id purchase(flight_id id);
 
-DB_DATAGRAM consult_flights(airport_id origin, airport_id destination);
+DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination);
 
 bool cancel(res_id id);
 
