@@ -24,13 +24,6 @@ struct session_t {
 extern int cli_count;
 #endif
 
-void sigpipe_handler(int s) {
-	printf("Recibido SIGPIPE.\n");
-	// ipc_disconnect(session);
-	// ipc_free(session);
-	exit(0);
-}
-
 static int file_exist(const char* path) {
 	return (access(path, 0) == 0);
 }
@@ -46,12 +39,10 @@ ipc_session ipc_newsession() {
 	ipc_session session = (ipc_session) malloc(sizeof(struct session_t));
 
 	return (ipc_session)session;
-
 }
 
 #ifdef SERVER
 int ipc_listen(ipc_session session, int argc, char** args) {
-
 
 	sem_queue_init(&session->queueid, 1);
 
@@ -72,12 +63,7 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 		fprintf(stderr, "Error al crear el FIFO en " FIFO_INITIAL_PATH "-w" "\n");
 	}
 
-	signal(SIGPIPE, sigpipe_handler);
-
-
-
 	return 0;
-
 }
 
 void ipc_accept(ipc_session session) {
@@ -101,7 +87,6 @@ void ipc_accept(ipc_session session) {
 	free(datagram);
 
 	printf("Cliente conectado...\n");
-
 }
 
 void ipc_sync(ipc_session session) {
@@ -161,7 +146,6 @@ void ipc_sync(ipc_session session) {
 
 	printf("Cliente sincronizado! %s\n", datagram->dg_cmd);
 	free(datagram);
-
 }
 
 void ipc_waitsync(ipc_session session) {
@@ -233,7 +217,6 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	free(datagram);
 
 	return 0;
-
 }
 #endif
 
@@ -250,7 +233,6 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 #endif
 
 	return 0;
-
 }
 
 DB_DATAGRAM* ipc_receive(ipc_session session) {
@@ -267,12 +249,9 @@ DB_DATAGRAM* ipc_receive(ipc_session session) {
 	datagram->size = size;
 
 	return datagram;
-
 }
 
 void ipc_disconnect(ipc_session session) {
-
-
 
 }
 
@@ -281,6 +260,4 @@ void ipc_free(ipc_session session) {
 	free(session);
 
 	sem_queue_destroy(session->queueid);
-
-
 }
