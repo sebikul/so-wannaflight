@@ -52,20 +52,25 @@ void serve() {
 			exit(0);
 		}
 
-		if (strcmp(dg->dg_cmd, "consultar") == 0) {
+		if (strcmp(datagram->dg_cmd, "consultar") == 0) {
 		}
-		if (strcmp(dg->dg_cmd, "comprar") == 0) {
+		if (strcmp(datagram->dg_cmd, "comprar") == 0) {
 		}
-		if (strcmp(dg->dg_cmd, "cancelar") == 0) {
+		if (strcmp(datagram->dg_cmd, "cancelar") == 0) {
 		}
 
-		dg->size = sizeof(DB_DATAGRAM) + n;
-		strcpy(dg->dg_cmd, mensaje);
+		free(datagram);
 
-		CLIPRINT("Enviando respuesta: %s\n", dg->dg_cmd);
-		//DUMP_DATAGRAM(dg);
-		ipc_send(session, dg);
-		free(dg);
+		datagram = malloc(sizeof(DB_DATAGRAM) + n);
+		datagram->size = sizeof(DB_DATAGRAM) + n;
+		datagram->opcode = OP_CMD;
+
+		strcpy(datagram->dg_cmd, mensaje);
+
+		CLIPRINT("Enviando respuesta: %s\n", datagram->dg_cmd);
+		//DUMP_DATAGRAM(datagram);
+		ipc_send(session, datagram);
+		free(datagram);
 	}
 }
 
