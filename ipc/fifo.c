@@ -9,12 +9,15 @@
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
+#include "semaphore.h"
 
 struct session_t {
 	char* path;
 
 	int serverfd_r;
 	int serverfd_w;
+
+	int queueid;
 };
 
 #ifdef SERVER
@@ -49,6 +52,12 @@ ipc_session ipc_newsession() {
 #ifdef SERVER
 int ipc_listen(ipc_session session, int argc, char** args) {
 
+
+	sem_queue_init(&session->queueid, 1);
+
+	//Inicializamos el valor del semaforo de la cola.
+	sem_set(session->queueid, SEM_QUEUE, 0);
+
 	printf("Creando FIFO...\n");
 
 	printf("Abriendo FIFO para lectura...\n");
@@ -65,8 +74,7 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 
 	signal(SIGPIPE, sigpipe_handler);
 
-	session->serverfd_r = open(FIFO_INITIAL_PATH "-r", O_RDONLY);
-	session->serverfd_w = open(FIFO_INITIAL_PATH "-w", O_WRONLY);
+
 
 	return 0;
 
@@ -78,7 +86,8 @@ void ipc_accept(ipc_session session) {
 
 	printf("Esperando cliente...\n");
 
-	//flock(session->serverfd_r, LOCK_EX);
+	session->serverfd_r = open(FIFO_INITIAL_PATH "-r", O_RDONLY);
+	session->serverfd_w = open(FIFO_INITIAL_PATH "-w", O_WRONLY);
 
 	//Recibimos el pedido de conexion
 	datagram = ipc_receive(session);
@@ -127,17 +136,17 @@ void ipc_sync(ipc_session session) {
 	strcpy(datagram->dg_cmd, newpath_base);
 	datagram->size = sizeof(DB_DATAGRAM) + strlen(datagram->dg_cmd);
 
-	DUMP_DATAGRAM(datagram);
+	//DUMP_DATAGRAM(datagram);
 
 	ipc_send(session, datagram);
 	free(datagram);
 
 	printf("Esperando ACK\n");
 
-	//flock(session->serverfd_r, LOCK_UN);
-
 	close(session->serverfd_w);
 	close(session->serverfd_r);
+
+	UNBLOCK_QUEUE(SEM_QUEUE);
 
 	//Bloquea en el open hasta que el cliente se conecte al nuevo FIFO.
 	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_w);
@@ -148,7 +157,7 @@ void ipc_sync(ipc_session session) {
 
 	datagram = ipc_receive(session);
 
-	DUMP_DATAGRAM(datagram);
+	//DUMP_DATAGRAM(datagram);
 
 	printf("Cliente sincronizado! %s\n", datagram->dg_cmd);
 	free(datagram);
@@ -157,7 +166,7 @@ void ipc_sync(ipc_session session) {
 
 void ipc_waitsync(ipc_session session) {
 
-	sleep(50000);
+	WAIT_FOR_QUEUE(SEM_QUEUE);
 
 }
 #endif
@@ -189,7 +198,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	datagram->opcode = OP_CONNECT;
 	datagram->size = sizeof(DB_DATAGRAM);
 
-	DUMP_DATAGRAM(datagram);
+	//DUMP_DATAGRAM(datagram);
 
 	ipc_send(session, datagram);
 	free(datagram);
@@ -218,7 +227,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	datagram->size = sizeof(DB_DATAGRAM) + strlen(datagram->dg_cmd);
 	datagram->opcode=OP_CMD;
 
-	DUMP_DATAGRAM(datagram);
+	//DUMP_DATAGRAM(datagram);
 
 	ipc_send(session, datagram);
 	free(datagram);
