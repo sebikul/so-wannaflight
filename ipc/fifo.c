@@ -12,7 +12,8 @@
 #include "semaphore.h"
 
 struct session_t {
-	char* path;
+	char* path_r;
+	char* path_w;
 
 	int serverfd_r;
 	int serverfd_w;
@@ -136,9 +137,13 @@ void ipc_sync(ipc_session session) {
 	//Bloquea en el open hasta que el cliente se conecte al nuevo FIFO.
 	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_w);
 	session->serverfd_w = open(newpath_w, O_WRONLY);
+	session->path_w = malloc(strlen(newpath_w) + 1);
+	strcpy(session->path_w, newpath_w);
 
 	printf("Abriendo nuevo FIFO de lectura: %s\n", newpath_r);
 	session->serverfd_r = open(newpath_r, O_RDONLY);
+	session->path_r = malloc(strlen(newpath_r) + 1);
+	strcpy(session->path_r, newpath_r);
 
 	datagram = ipc_receive(session);
 
@@ -206,10 +211,9 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_r);
 	session->serverfd_r = open(newpath_r, O_WRONLY);
 
-
 	strcpy(datagram->dg_cmd, "Hola!!!!");
 	datagram->size = sizeof(DB_DATAGRAM) + strlen(datagram->dg_cmd);
-	datagram->opcode=OP_CMD;
+	datagram->opcode = OP_CMD;
 
 	//DUMP_DATAGRAM(datagram);
 
@@ -253,11 +257,19 @@ DB_DATAGRAM* ipc_receive(ipc_session session) {
 
 void ipc_disconnect(ipc_session session) {
 
+	close(session->serverfd_w);
+	close(session->serverfd_r);
+
 }
 
 void ipc_free(ipc_session session) {
 
-	free(session);
-
+#ifdef SERVER
 	sem_queue_destroy(session->queueid);
+
+	unlink(session->path_r);
+	unlink(session->path_w);
+#endif
+
+	free(session);
 }
