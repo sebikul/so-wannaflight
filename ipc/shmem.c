@@ -175,7 +175,7 @@ void ipc_sync(ipc_session session) {
 
 	DB_DATAGRAM *datagram = (DB_DATAGRAM*)session->alloc;
 
-	if (datagram->dg_shmemkey == -1) {
+	if (datagram->opcode == OP_CONNECT) {
 		CLIPRINTE("Pedido de zona de memoria recibido.\n");
 	} else {
 		CLIPRINTE("Error en el protocolo de sincronizacion.\n");
@@ -254,8 +254,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	datagram = (DB_DATAGRAM*) session->alloc;
 
 	datagram->size = sizeof(DB_DATAGRAM);
-	datagram->dg_shmemkey = -1;
-	datagram->opcode = OP_CMD;
+	datagram->opcode = OP_CONNECT;
 
 	//STEP-1
 	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
