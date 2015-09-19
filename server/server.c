@@ -3,6 +3,9 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "config.h"
+#include "database.h"
 #include "ipc.h"
 
 #define BUFFER_SIZE 50
@@ -17,6 +20,15 @@ void int_handler(int s) {
 	ipc_free(session);
 	exit(0);
 }
+
+#ifdef FIFO
+void sigpipe_handler(int s) {
+	printf("Recibido SIGPIPE.\n");
+	ipc_disconnect(session);
+	ipc_free(session);
+	exit(0);
+}
+#endif
 
 void serve() {
 	static char* mensaje = "Mensaje recibido";
@@ -65,6 +77,18 @@ int main(int argc, char** argv) {
 	printf("Starting server...\n");
 
 	signal(SIGINT, int_handler);
+
+#ifdef FIFO
+	signal(SIGPIPE, sigpipe_handler);
+#endif
+
+	printf("Opening database...\n");
+	db_open(DB_PATH);
+
+	// consult_flights(20, 30);
+	// exit(0);
+
+	// //////////////////////////////////////////////
 
 	session = ipc_newsession();
 	err = ipc_listen(session, argc - 1, ++argv);
