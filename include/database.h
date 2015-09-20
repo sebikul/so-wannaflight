@@ -33,22 +33,25 @@ typedef struct __attribute__((packed)) {
 	airport_id destination;
 } DB_ENTRY;
 
-typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT, OP_CONNECT} OPCODE;
+typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT, OP_CONNECT, OP_OK, OP_ERROR} OPCODE;
 
 typedef struct {
 	size_t size;
 	OPCODE opcode;
 
 	union {
-		int 	_count;
-		res_id  _seat;
-		bool 	_result;
-		int 	_shmemkey;
+		int 		_count;
+		res_id  	_seat;
+		bool 		_result;
+		int 		_shmemkey;
+		flight_id 	_flight_id;
+		int 		_origin;
 	} _data;
 
 	union {
 		DB_ENTRY 	_results[1];
 		char 		_cmd[1];
+		int 		_destination;
 	} _raw_data;
 
 } DB_DATAGRAM;
@@ -57,20 +60,29 @@ typedef struct {
 #define dg_seat 		_data._seat
 #define dg_result 		_data._result
 #define dg_shmemkey 	_data._shmemkey
+#define dg_flightid		_data._flight_id
+#define dg_origin		_data._origin
 
 #define dg_cmd			_raw_data._cmd
 #define dg_results		_raw_data._results
+#define dg_destination  _raw_data._destination
 
 
 #define DUMP_DBENTRY(entry)			printf("[DB_ENTRY][\n\t\tVuelo ID: %d\n\t\tSalida: %lld\n\t\tOrigen: %d\n\t\tDestino: %d\n]\n",\
 										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
 
-#define DUMP_DATAGRAM(datagram)		printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n\tCantidad: %d\n\tAsiento: %d\n\tResultado: %s\n\tCMD: %s\n]\n",\
-											 datagram->size, datagram->opcode, datagram->dg_count, datagram->dg_seat,datagram->dg_result?"TRUE":"FALSE",datagram->dg_cmd);\
-
+#define DUMP_DATAGRAM(datagram)		{\
+										printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n", datagram->size, datagram->opcode);\
+										if(datagram->opcode==OP_CONSULT){\
+											printf("\tCantidad: %d\n\tOrigen: %d\n\tDestino: %d\n", datagram->dg_count, datagram->dg_origin, datagram->dg_destination);\
+											DUMP_RESULT_DATAGRAM(datagram);\
+										}else if(datagram->opcode==OP_CMD){\
+											printf("CMD: %s\n", datagram->dg_cmd);\
+										}\
+										printf("]\n");\
+									}
 
 #define DUMP_RESULT_DATAGRAM(datagram)	{\
-											DUMP_DATAGRAM(datagram)\
 											for(int i = 0; i < datagram->dg_count; i++){\
 												DUMP_DBENTRY(datagram->dg_results[i]);\
 											}\
