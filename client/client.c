@@ -80,9 +80,7 @@ int main(int argc, char** argv) {
 
 		if(strcmp(buffer, "exit") == 0){
 			send_exit();
-			ipc_disconnect(session);
-			ipc_free(session);
-			exit(0);
+			break;
 		}
 
 		send_cmd(buffer, n);

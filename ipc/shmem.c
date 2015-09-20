@@ -21,7 +21,7 @@ struct session_t {
 	char* alloc;
 };
 
-#define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\nalloc: %p\n]\n\n", shmem.semid, shmem.queueid, shmem.memid,shmem.alloc);
+#define DUMP_SHMEM_DATA() 	printf("\n[\nsemid: %d\nqueueid: %d\nmemid: %d\nalloc: %p\n]\n\n", session->semid, session->queueid, session->memid,session->alloc);
 
 #ifdef SERVER
 extern int cli_count;
@@ -159,6 +159,7 @@ void ipc_accept(ipc_session session) {
 	sem_reset(session);
 
 	//STEP-0: Bloquea hasta que un cliente ejecute semup
+	//PRINT_SEM_VALUES;
 	WAIT_FOR(SEM_CLIENT);
 
 	SRVPRINTE("Cliente conectado...\n");

@@ -37,18 +37,18 @@ void serve() {
 
 	while (1) {
 
-		DB_DATAGRAM* dg = ipc_receive(session);
-		//DUMP_DATAGRAM(dg);
-		CLIPRINT("Mensaje recibido: %s\n", dg->dg_cmd);
+		DB_DATAGRAM* datagram = ipc_receive(session);
+		DUMP_DATAGRAM(datagram);
+		CLIPRINT("Mensaje recibido: %s\n", datagram->dg_cmd);
 
-		if (strcmp(dg->dg_cmd, "salir") == 0) {
+		if (datagram->opcode == OP_EXIT) {
 			CLIPRINTE("Comando de salida recibido!\n");
-			dg->opcode = OP_EXIT;
-			ipc_send(session, dg);
-			free(dg);
-			CLIPRINTE("Cliente desconectado. Limpiando...\n");
+
+			free(datagram);
+
 			ipc_disconnect(session);
-			ipc_free(session);
+			//ipc_free(session);
+
 			exit(0);
 		}
 
@@ -117,6 +117,7 @@ int main(int argc, char** argv) {
 		case 0: /* hijo */
 			ipc_sync(session);
 			serve();
+			return 0;
 			break;
 
 		default:

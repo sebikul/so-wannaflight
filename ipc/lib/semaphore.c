@@ -9,7 +9,7 @@ void sem_init_with_key(int* semid, key_t semkey, int n) {
 
 	//Creamos los semaforos para sincronizar cliente servidor
 	if ((*semid = semget(semkey, n, 0)) >= 0 ) {
-		//printf("Sync semaphores already exist with id: %d\n", *semid);
+		printf("Sync semaphores already exist with id: %d\n", *semid);
 		return;
 	}
 
@@ -18,7 +18,7 @@ void sem_init_with_key(int* semid, key_t semkey, int n) {
 		exit(1);
 	}
 
-	//printf("Initialized sync semaphores with id %d\n", *semid);
+	printf("Initialized sync semaphores with id %d\n", *semid);
 
 }
 
@@ -38,7 +38,7 @@ void sem_queue_init(int* queueid, int n) {
 
 	//Creamos el semaforo para la cola de clientes
 	if ((*queueid = semget(queuekey, n, 0)) >= 0 ) {
-		//printf("Queue semaphore already exist with id: %d\n", *queueid);
+		printf("Queue semaphore already exist with id: %d\n", *queueid);
 		return;
 	}
 
@@ -47,7 +47,7 @@ void sem_queue_init(int* queueid, int n) {
 		exit(1);
 	}
 
-	//printf("Initialized queue semaphores with id %d\n", shmem.queueid);
+	printf("Initialized queue semaphores with id %d\n", *queueid);
 
 }
 
@@ -59,7 +59,7 @@ void sem_set(int semid, int semnum, int val) {
 
 void sem_destroy(int semid) {
 
-	//CLIPRINTE("Destroying semaphores...\n");
+	printf("Destroying sync semaphores with id %d\n", semid);
 
 	//Destruimos los semaforos
 	semctl(semid, 0, IPC_RMID);

@@ -222,13 +222,9 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
     return datagram;
 }
 
-bool cancel(res_id id) {
+void cancel(res_id id) {
     
-    char query[128];
-
-    sprintf(query, "DELETE FROM ticket (resid) WHERE resid = %d;", id);
-
-    DB_EXEC(db, query);
+    remove_ticket(id);
 }
 
 
