@@ -34,8 +34,6 @@ void serve() {
 
 	while (1) {
 
-		int opcode;
-
 		DB_DATAGRAM* datagram, *ans;
 
 		datagram = ipc_receive(session);
@@ -47,7 +45,7 @@ void serve() {
 			free(datagram);
 
 			ipc_disconnect(session);
-			
+
 			//FIXME: Deberia liberar los recursos, pero no liberar el semaforo de cola
 			//ipc_free(session);
 
@@ -67,6 +65,8 @@ void serve() {
 
 		} else if (datagram->opcode == OP_CANCEL) {
 
+			ans = malloc(sizeof(DB_DATAGRAM));
+			ans->size = sizeof(DB_DATAGRAM);
 			ans->opcode = OP_OK;
 
 		} else if (datagram->opcode == OP_PING) {
@@ -78,6 +78,9 @@ void serve() {
 			ans->opcode = OP_PONG;
 			strcpy(ans->dg_cmd, datagram->dg_cmd);
 
+		}else{
+			free(datagram);
+			continue;
 		}
 
 		free(datagram);
