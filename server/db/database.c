@@ -87,7 +87,7 @@ static void db_create() {
 
 }
 
-static int db_flight_exists(flight_id id){
+static int db_flight_exists(flight_id id) {
 
     char query[128];
     sqlite3_stmt * statement;
@@ -168,7 +168,7 @@ static void remove_ticket(res_id id) {
 
 res_id purchase(flight_id id) {
 
-    if(!db_flight_exists(id)){
+    if (!db_flight_exists(id)) {
         return -1;
     }
 
@@ -188,7 +188,7 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
     DB_PREPARE_STATEMENT(db, query, statement);
 
     datagram = malloc(DATAGRAM_MAXSIZE);
-    datagram->opcode = OP_CONSULT;
+
 
     while ( (rc = sqlite3_step(statement)) == SQLITE_ROW) {
 
@@ -216,14 +216,13 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
 
     datagram->dg_count = rowcount;
     datagram->size = sizeof(DB_DATAGRAM) + rowcount * sizeof(DB_ENTRY);
-
-    //DUMP_RESULT_DATAGRAM(datagram);
+    datagram->opcode = OP_OK;
 
     return datagram;
 }
 
 void cancel(res_id id) {
-    
+
     remove_ticket(id);
 }
 

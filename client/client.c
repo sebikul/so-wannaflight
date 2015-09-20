@@ -28,7 +28,7 @@ static void send_cmd(char* cmd, int n) {
 	free(datagram);
 }
 
-static void send_exit(){
+static void send_exit() {
 
 	DB_DATAGRAM *datagram;
 
@@ -75,10 +75,10 @@ int main(int argc, char** argv) {
 	printf("Los comandos disponibles son: consultar, comprar, cancelar, salir\n");
 
 	while ((n = read(0, buffer, SHMEM_SIZE)) > 0 ) {
-		
+
 		buffer[n - 1] = 0;
 
-		if(strcmp(buffer, "exit") == 0){
+		if (strcmp(buffer, "exit") == 0) {
 			send_exit();
 			break;
 		}
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 		send_cmd(buffer, n);
 		datagram = ipc_receive(session);
 		printf("Respuesta: %s\n", datagram->dg_cmd);
-		
+
 	}
 
 	ipc_disconnect(session);

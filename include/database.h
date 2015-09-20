@@ -33,7 +33,7 @@ typedef struct __attribute__((packed)) {
 	airport_id destination;
 } DB_ENTRY;
 
-typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT, OP_CONNECT, OP_OK, OP_ERROR} OPCODE;
+typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT, OP_CONNECT, OP_OK, OP_ERROR, OP_PING, OP_PONG} OPCODE;
 
 typedef struct {
 	size_t size;
@@ -76,7 +76,7 @@ typedef struct {
 										if(datagram->opcode==OP_CONSULT){\
 											printf("\tCantidad: %d\n\tOrigen: %d\n\tDestino: %d\n", datagram->dg_count, datagram->dg_origin, datagram->dg_destination);\
 											DUMP_RESULT_DATAGRAM(datagram);\
-										}else if(datagram->opcode==OP_CMD){\
+										}else if(datagram->opcode==OP_CMD || datagram->opcode==OP_PING || datagram->opcode==OP_PONG){\
 											printf("CMD: %s\n", datagram->dg_cmd);\
 										}\
 										printf("]\n");\
