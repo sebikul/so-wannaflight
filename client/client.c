@@ -18,6 +18,13 @@
 										continue;\
 									}
 
+#define DUMP_ARGS(argc, argv)	{\
+									for (int i = 0; i < argc; i++) {\
+										printf("%s ", argv[i]);\
+									}\
+									printf("\n");\
+								}
+
 static ipc_session session;
 
 struct shell_cmd {
@@ -86,9 +93,31 @@ struct shell_cmd parse_command(char* command) {
 
 }
 
-static void parse_answer(DB_DATAGRAM* datagram){
+static void parse_answer(DB_DATAGRAM* datagram) {
+
+
+	switch (datagram->opcode) {
+
+	case OP_PONG:
+		printf("PONG: %s\n", datagram->dg_cmd);
+		break;
+
+	case OP_CONSULT:
+		printf("Cantidad de vuelos encontrados: %d\n", datagram->dg_count);
+
+		DUMP_DATAGRAM(datagram);
+
+		// for(int i=0;i<datagram->dg_count;i++){
+
+		// }
+		break;
+
+
+
+	}
 
 }
+
 
 static void send_exit() {
 
@@ -139,6 +168,10 @@ int main(int argc, char** argv) {
 
 		buffer[n - 1] = 0;
 
+		if (strlen(buffer) == 0) {
+			continue;
+		}
+
 		if (strcmp(buffer, "exit") == 0) {
 			send_exit();
 			break;
@@ -149,49 +182,56 @@ int main(int argc, char** argv) {
 
 			if (strcmp(cmd.argv[0], "ping") == 0) {
 
-				CHECK_ARGC(argc, 1);
-
 				int size = sizeof(DB_DATAGRAM) + n;
 
 				datagram = (DB_DATAGRAM*) malloc(size);
 				datagram->size = size;
 				datagram->opcode = OP_PING;
 
-				strcpy(datagram->dg_cmd, buffer[5]);
+				strcpy(datagram->dg_cmd, buffer + 5);
 
 			} else if (strcmp(cmd.argv[0], "consult") == 0) {
 
-				CHECK_ARGC(argc, 3);
+				CHECK_ARGC(cmd.argc, 3);
 
 				datagram = (DB_DATAGRAM*) malloc(sizeof(DB_DATAGRAM));
 				datagram->size = sizeof(DB_DATAGRAM);
 				datagram->opcode = OP_CONSULT;
 
-				datagram->dg_origin = atoi(argv[1]);
-				datagram->dg_destination = atoi(argv[2]);
+				datagram->dg_origin = atoi(cmd.argv[1]);
+				datagram->dg_destination = atoi(cmd.argv[2]);
 
 
 			} else if (strcmp(cmd.argv[0], "purchase") == 0) {
 
-				CHECK_ARGC(argc, 2);
+				CHECK_ARGC(cmd.argc, 2);
 
 				datagram = (DB_DATAGRAM*) malloc(sizeof(DB_DATAGRAM));
 				datagram->size = sizeof(DB_DATAGRAM);
 				datagram->opcode = OP_PURCHASE;
 
-				datagram->dg_flightid = atoi(argv[1]);
+				datagram->dg_flightid = atoi(cmd.argv[1]);
 
-			}else if (strcmp(cmd.argv[0], "cancel") == 0) {
+			} else if (strcmp(cmd.argv[0], "cancel") == 0) {
 
-				CHECK_ARGC(argc, 2);
+				CHECK_ARGC(cmd.argc, 2);
 
 				datagram = (DB_DATAGRAM*) malloc(sizeof(DB_DATAGRAM));
 				datagram->size = sizeof(DB_DATAGRAM);
 				datagram->opcode = OP_CANCEL;
 
-				datagram->dg_seat = atoi(argv[1]);
+				datagram->dg_seat = atoi(cmd.argv[1]);
 
-			}else{
+			} else {
+
+				for (int i = 0; i < cmd.argc; i++) {
+					free(cmd.argv[i]);
+				}
+				free(cmd.argv);
+
+				printf("Comando invalido.\n");
+
+				continue;
 
 			}
 
@@ -206,8 +246,6 @@ int main(int argc, char** argv) {
 			datagram = ipc_receive(session);
 
 			parse_answer(datagram);
-
-			DUMP_DATAGRAM(datagram);
 
 		}
 
