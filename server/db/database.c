@@ -112,17 +112,25 @@ static int db_flight_exists(flight_id id) {
 
 int db_open(const char* path) {
 
-    int rc = sqlite3_open(path, &db);
+    int has_to_populate = 0;
+    int rc;
+
+    if (!file_exist(path)) {
+        has_to_populate = 1;
+    }
+
+    rc = sqlite3_open(path, &db);
 
     if (rc != SQLITE_OK) {
         printf("Can't open database: %s\n", sqlite3_errmsg(db));
         return 1;
     } else {
 
-        if (!file_exist(path)) {
+        if (has_to_populate) {
             printf("%s\n", "Database does not exist. Creating...");
             db_create();
         }
+
 
         printf("%s\n", "Opened database successfully");
     }
@@ -189,7 +197,6 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
 
     datagram = malloc(DATAGRAM_MAXSIZE);
 
-
     while ( (rc = sqlite3_step(statement)) == SQLITE_ROW) {
 
         DB_ENTRY entry;
@@ -216,7 +223,7 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
 
     datagram->dg_count = rowcount;
     datagram->size = sizeof(DB_DATAGRAM) + rowcount * sizeof(DB_ENTRY);
-    datagram->opcode = OP_OK;
+    datagram->opcode = OP_CONSULT;
 
     return datagram;
 }
