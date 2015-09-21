@@ -18,6 +18,7 @@ void int_handler(int s) {
 	printf("Limpiando antes de salir!\n");
 	ipc_disconnect(session);
 	ipc_free(session);
+	db_close();
 	exit(0);
 }
 
@@ -26,6 +27,7 @@ void sigpipe_handler(int s) {
 	printf("Recibido SIGPIPE.\n");
 	ipc_disconnect(session);
 	ipc_free(session);
+	db_close();
 	exit(0);
 }
 #endif
@@ -37,7 +39,7 @@ void serve() {
 		DB_DATAGRAM* datagram, *ans;
 
 		datagram = ipc_receive(session);
-		DUMP_DATAGRAM(datagram);
+		//DUMP_DATAGRAM(datagram);
 
 		if (datagram->opcode == OP_EXIT) {
 			CLIPRINTE("Comando de salida recibido!\n");
@@ -52,24 +54,28 @@ void serve() {
 			exit(0);
 		}
 
-		if (datagram->opcode == OP_CONSULT) {
+		switch (datagram->opcode) {
 
+		case OP_CONSULT:
 			ans = consult_flights(datagram->dg_origin, datagram->dg_destination);
+			break;
 
-		} else if (datagram->opcode == OP_PURCHASE) {
+		case OP_PURCHASE:
 
 			ans = malloc(sizeof(DB_DATAGRAM));
 			ans->size = sizeof(DB_DATAGRAM);
 			ans->opcode = OP_OK;
 			ans->dg_seat = purchase(datagram->dg_flightid);
+			break;
 
-		} else if (datagram->opcode == OP_CANCEL) {
+		case OP_CANCEL:
 
 			ans = malloc(sizeof(DB_DATAGRAM));
 			ans->size = sizeof(DB_DATAGRAM);
 			ans->opcode = OP_OK;
+			break;
 
-		} else if (datagram->opcode == OP_PING) {
+		case OP_PING: {
 
 			int size = sizeof(DB_DATAGRAM) + strlen(datagram->dg_cmd) + 1;
 
@@ -77,9 +83,14 @@ void serve() {
 			ans->size = size;
 			ans->opcode = OP_PONG;
 			strcpy(ans->dg_cmd, datagram->dg_cmd);
+			break;
+		}
 
-		}else{
+		default:
 			free(datagram);
+
+			printf("Comando invalido.\n");
+
 			continue;
 		}
 
