@@ -193,15 +193,46 @@ int main(int argc, char** argv) {
 
 			} else if (strcmp(cmd.argv[0], "consult") == 0) {
 
-				CHECK_ARGC(cmd.argc, 3);
-
 				datagram = (DB_DATAGRAM*) malloc(sizeof(DB_DATAGRAM));
 				datagram->size = sizeof(DB_DATAGRAM);
 				datagram->opcode = OP_CONSULT;
 
-				datagram->dg_origin = atoi(cmd.argv[1]);
-				datagram->dg_destination = atoi(cmd.argv[2]);
+				datagram->dg_origin = -1;
+				datagram->dg_destination = -1;
 
+				int i = 1;
+
+				printf("argc: %d\n", cmd.argc);
+
+				while (i < cmd.argc) {
+
+					printf("argc: %d, argv: <%s>\n", i, cmd.argv[i]);
+
+					if (strcmp(cmd.argv[i], "to") == 0) {
+
+						if (cmd.argc == i + 1) {
+							printf("Comando invalido.\n");
+						}
+
+						i++;
+						datagram->dg_destination = atoi(cmd.argv[i]);
+						i++;
+					} else if (strcmp(cmd.argv[i], "from") == 0) {
+
+						if (cmd.argc == i + 1) {
+							printf("Comando invalido.\n");
+						}
+
+						i++;
+						datagram->dg_origin = atoi(cmd.argv[i]);
+						i++;
+					} else {
+						printf("Comando invalido.\n");
+					}
+
+				}
+
+				printf("Yendo de %d a %d\n", datagram->dg_origin, datagram->dg_destination);
 
 			} else if (strcmp(cmd.argv[0], "purchase") == 0) {
 
