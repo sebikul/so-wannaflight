@@ -142,7 +142,7 @@ void ipc_sync(ipc_session session) {
 	close(session->serverfd_w);
 	close(session->serverfd_r);
 
-	UNBLOCK_QUEUE(SEM_QUEUE);
+	sem_up(session->queueid, SEM_QUEUE);
 
 	//Bloquea en el open hasta que el cliente se conecte al nuevo FIFO.
 	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_w);
@@ -170,7 +170,7 @@ void ipc_sync(ipc_session session) {
 
 void ipc_waitsync(ipc_session session) {
 
-	WAIT_FOR_QUEUE(SEM_QUEUE);
+	sem_down(session->queueid, SEM_QUEUE);
 
 }
 #endif

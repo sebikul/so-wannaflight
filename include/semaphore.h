@@ -13,11 +13,11 @@
 #define SEM_SERVER 			0
 #define SEM_CLIENT 			1
 
-#define WAIT_FOR(sem) 		sem_down(session->semid, sem)
-#define UNBLOCK(sem)		sem_up(session->semid, sem)
+// #define WAIT_FOR(sem) 		sem_down(session->semid, sem)
+// #define UNBLOCK(sem)		sem_up(session->semid, sem)
 
-#define WAIT_FOR_QUEUE(sem) sem_down(session->queueid, sem)
-#define UNBLOCK_QUEUE(sem) 	sem_up(session->queueid, sem)
+// #define WAIT_FOR_QUEUE(sem) sem_down(session->queueid, sem)
+// #define UNBLOCK_QUEUE(sem) 	sem_up(session->queueid, sem)
 
 
 void sem_init_with_key(int* semid, key_t semkey, int n);

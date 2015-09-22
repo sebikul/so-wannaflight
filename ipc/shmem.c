@@ -98,9 +98,9 @@ ipc_session ipc_newsession() {
 DB_DATAGRAM* ipc_receive(ipc_session session) {
 
 #ifdef SERVER
-	WAIT_FOR(SEM_CLIENT); //Esperamos que el cliente mande un comando
+	sem_down(session->semid, SEM_CLIENT); //Esperamos que el cliente mande un comando
 #else
-	WAIT_FOR(SEM_SERVER); //Esperamos que el servidor mande una respuesta
+	sem_down(session->semid, SEM_SERVER); //Esperamos que el servidor mande una respuesta
 #endif
 
 
@@ -124,15 +124,17 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 	memcpy(session->alloc, data, data->size);
 
 #ifdef SERVER
-	UNBLOCK(SEM_SERVER); //Desbloqueamos el cliente
+	sem_up(session->semid, SEM_SERVER); //Desbloqueamos el cliente
 #else
-	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
+	sem_up(session->semid, SEM_CLIENT); //Desbloqueamos el servidor
 #endif
 
 	return 0;
 
 }
 
+
+#ifdef SERVER
 int ipc_listen(ipc_session session, int argc, char** args) {
 
 	SRVPRINTE("Inicializando IPC de shared memory...\n");
@@ -152,7 +154,6 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 
 }
 
-#ifdef SERVER
 void ipc_accept(ipc_session session) {
 
 	//Reseteamos los valores de los semaforos para aceptar al nuevo cliente.
@@ -160,7 +161,7 @@ void ipc_accept(ipc_session session) {
 
 	//STEP-0: Bloquea hasta que un cliente ejecute semup
 	//PRINT_SEM_VALUES;
-	WAIT_FOR(SEM_CLIENT);
+	sem_down(session->semid, SEM_CLIENT);
 
 	SRVPRINTE("Cliente conectado...\n");
 
@@ -171,7 +172,7 @@ void ipc_sync(ipc_session session) {
 	CLIPRINTE("Fork creado, esperando pedido de memoria.\n");
 
 	//STEP-1
-	WAIT_FOR(SEM_CLIENT); //Esperamos al primer mensaje
+	sem_down(session->semid, SEM_CLIENT); //Esperamos al primer mensaje
 
 	DB_DATAGRAM *datagram = (DB_DATAGRAM*)session->alloc;
 
@@ -205,20 +206,20 @@ void ipc_sync(ipc_session session) {
 	//UNBLOCK(SEM_SERVER); //Despertamos el cliente para que haga attach de la zona de memoria pedida
 	sem_up(oldsemid, SEM_SERVER);
 
-
 	//STEP-3
 	//WAIT_FOR(SEM_CLIENT); //Esperamos que haga attach, y continuamos para esperar comandos del cliente
 	sem_down(oldsemid, SEM_CLIENT);
 
 	CLIPRINTE("Sincronizacion completa. Esperando comandos...\n");
 
-	UNBLOCK_QUEUE(SEM_SRV_QUEUE);
+	sem_up(session->queueid, SEM_SRV_QUEUE);
+
 
 }
 
 void ipc_waitsync(ipc_session session) {
 
-	WAIT_FOR_QUEUE(SEM_SRV_QUEUE);
+	sem_down(session->queueid, SEM_SRV_QUEUE);
 
 }
 
@@ -238,12 +239,12 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 	printf("Esperando en la cola...\n");
 
-	WAIT_FOR_QUEUE(SEM_QUEUE); //Si entra otro cliente, queda bloqueado en una "cola"
+	sem_down(session->queueid, SEM_QUEUE); //Si entra otro cliente, queda bloqueado en una "cola"
 
 	printf("Conectado con el servidor...\n");
 
 	// STEP-0: Desbloqueamos el servidor
-	UNBLOCK(SEM_CLIENT);
+	sem_up(session->semid, SEM_CLIENT);
 
 	datagram = (DB_DATAGRAM*) session->alloc;
 
@@ -251,12 +252,12 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	datagram->opcode = OP_CONNECT;
 
 	//STEP-1
-	UNBLOCK(SEM_CLIENT); //Desbloqueamos el servidor
+	sem_up(session->semid, SEM_CLIENT); //Desbloqueamos el servidor
 
 	printf("Pedido de zona de memoria enviado.\n");
 
 	//STEP-2
-	WAIT_FOR(SEM_SERVER);//Esperamos que el servidor llene la shmemkey
+	sem_down(session->semid, SEM_SERVER); //Esperamos que el servidor llene la shmemkey
 
 	printf("Recibiendo zona de memoria...\n");
 
@@ -274,7 +275,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	//STEP-3
 	sem_up(oldsemid, SEM_CLIENT);
 
-	UNBLOCK_QUEUE(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
+	sem_up(session->queueid, SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
 
 	printf("Listo para enviar comandos...\n");
 
