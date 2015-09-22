@@ -2,7 +2,7 @@ GCCFLAGS=-Wall -g -DCLIENT -I../include client.c
 
 .PHONY: all clean shmem socket fifo
 
-all: shmem socket fifo
+all: shmem socket fifo filesig
 
 shmem:
 	gcc $(GCCFLAGS) -o client-shmem ../ipc/shmem.c  ../ipc/lib/semaphore.c
@@ -12,6 +12,9 @@ socket:
 
 fifo:
 	gcc $(GCCFLAGS) -o client-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
+
+filesig:
+	gcc $(GCCFLAGS) -DFIFO -o client-filesig ../ipc/filesig.c  ../ipc/lib/semaphore.c
 
 clean: 
 	rm -f *.o

@@ -2,7 +2,7 @@ GCCFLAGS=-Wall -ggdb -DSERVER -pthread -ldl -I../include sqlite3/sqlite3.o serve
 
 .PHONY: all clean sqlite3 socket shmem fifo
 
-all: shmem socket fifo
+all: shmem socket fifo filesig
 
 run: clean server.o
 	./server
@@ -18,6 +18,9 @@ socket: sqlite3
 
 fifo: sqlite3
 	gcc $(GCCFLAGS) -DFIFO -o server-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
+
+filesig: sqlite3
+	gcc $(GCCFLAGS) -DFIFO -o server-filesig ../ipc/filesig.c  ../ipc/lib/semaphore.c
 
 clean: 
 	cd sqlite3; make clean
