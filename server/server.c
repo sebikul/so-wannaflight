@@ -39,9 +39,11 @@ void serve() {
 		DB_DATAGRAM* datagram, *ans;
 
 		datagram = ipc_receive(session);
-		//DUMP_DATAGRAM(datagram);
 
-		if (datagram->opcode == OP_EXIT) {
+		switch (datagram->opcode) {
+
+		case OP_EXIT:
+
 			CLIPRINTE("Comando de salida recibido!\n");
 
 			free(datagram);
@@ -52,29 +54,27 @@ void serve() {
 			//ipc_free(session);
 
 			exit(0);
-		}
-
-		switch (datagram->opcode) {
+			break;
 
 		case OP_CONSULT:
-			ans = consult_flights(datagram->dg_origin, datagram->dg_destination);
+			ans = db_consult_flights(datagram->dg_origin, datagram->dg_destination);
 			break;
 
 		case OP_PURCHASE:
 
 			ans = malloc(sizeof(DB_DATAGRAM));
 			ans->size = sizeof(DB_DATAGRAM);
-			ans->opcode = OP_OK;
-			ans->dg_seat = purchase(datagram->dg_flightid);
+			ans->opcode = OP_PURCHASE;
+			ans->dg_seat = db_purchase(datagram->dg_flightid);
 			break;
 
 		case OP_CANCEL:
 
-			cancel(datagram->dg_seat);
-
 			ans = malloc(sizeof(DB_DATAGRAM));
 			ans->size = sizeof(DB_DATAGRAM);
-			ans->opcode = OP_OK;
+			ans->opcode = OP_CANCEL;
+
+			ans->dg_result = db_cancel(datagram->dg_seat);
 			break;
 
 		case OP_PING: {
@@ -86,6 +86,20 @@ void serve() {
 			ans->opcode = OP_PONG;
 			strcpy(ans->dg_cmd, datagram->dg_cmd);
 			break;
+		}
+
+		case OP_ADDFLIGHT: {
+
+			DB_ENTRY entry = datagram->dg_results[0];
+
+			ans = malloc(sizeof(DB_DATAGRAM));
+			ans->size = sizeof(DB_DATAGRAM);
+			ans->opcode = OP_ADDFLIGHT;
+
+			ans->dg_flightid = db_add_flight(entry.departure, entry.origin, entry.destination);
+
+			break;
+
 		}
 
 		default:
