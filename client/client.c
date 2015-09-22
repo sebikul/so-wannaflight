@@ -68,6 +68,8 @@ struct shell_cmd parse_command(char* command) {
 			command++;
 		}
 
+		*pos = 0;
+
 		if (comillas && *command == '"') {
 			command++;
 			comillas = 0;
