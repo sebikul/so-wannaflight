@@ -26,6 +26,7 @@
 								}
 
 static ipc_session session;
+static int is_admin = 0;
 
 struct shell_cmd {
 	int argc;
@@ -223,6 +224,11 @@ int main(int argc, char** argv) {
 				datagram->dg_seat = atoi(cmd.argv[1]);
 
 			} else {
+
+				if (strcmp(cmd.argv[0], "makeadmin") == 0) {
+					is_admin = 1;
+					printf("Privilegios de administrador activados!\n");
+				}
 
 				for (int i = 0; i < cmd.argc; i++) {
 					free(cmd.argv[i]);
