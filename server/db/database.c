@@ -191,7 +191,15 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
     int rowcount = 0;
     int rc;
 
-    sprintf(query, "SELECT * FROM flight WHERE origin = %d AND destination = %d", origin, destination);
+    if (origin == -1 && destination == -1) {
+        sprintf(query, "SELECT * FROM flight");
+    } else if (origin == -1) {
+        sprintf(query, "SELECT * FROM flight WHERE destination = %d", destination);
+    } else if (destination == -1) {
+        sprintf(query, "SELECT * FROM flight WHERE origin = %d", origin);
+    } else {
+        sprintf(query, "SELECT * FROM flight WHERE origin = %d AND destination = %d", origin, destination);
+    }
 
     DB_PREPARE_STATEMENT(db, query, statement);
 
