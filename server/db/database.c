@@ -63,11 +63,11 @@ static void db_create() {
 
 
     sql = "CREATE TABLE ticket("
-          "resid    INT  PRIMARY KEY NOT NULL,"
+          "resid    INT  PRIMARY KEY AUTOINCREMENT,"
           "flightid INT              NOT NULL );"
 
           "CREATE TABLE flight("
-          "id             INT PRIMARY KEY    NOT NULL,"
+          "id             INT PRIMARY KEY AUTOINCREMENT,"
           "departure      INT                NOT NULL,"
           "origin         INT                NOT NULL,"
           "destination    INT                NOT NULL );";
@@ -142,7 +142,7 @@ void db_close() {
     sqlite3_close(db);
 }
 
-static int add_flight(time_t departure, int origin, int destination) {
+int db_add_flight(time_t departure, int origin, int destination) {
 
     char query[128];
 
@@ -164,17 +164,19 @@ static int add_ticket(flight_id id) {
     return sqlite3_last_insert_rowid(db);
 }
 
-static void remove_ticket(res_id id) {
+static bool remove_ticket(res_id id) {
 
     char query[128];
 
     sprintf(query, "DELETE FROM ticket where resid = %d;", id);
 
     DB_EXEC(db, query);
+
+    return TRUE;
 }
 
 
-res_id purchase(flight_id id) {
+res_id db_purchase(flight_id id) {
 
     if (!db_flight_exists(id)) {
         return -1;
@@ -183,7 +185,7 @@ res_id purchase(flight_id id) {
     return add_ticket(id);
 }
 
-DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
+DB_DATAGRAM* db_consult_flights(airport_id origin, airport_id destination) {
 
     char query[128] = {0};
     sqlite3_stmt * statement;
@@ -238,9 +240,9 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
     return datagram;
 }
 
-void cancel(res_id id) {
+bool db_cancel(res_id id) {
 
-    remove_ticket(id);
+    return remove_ticket(id);
 }
 
 

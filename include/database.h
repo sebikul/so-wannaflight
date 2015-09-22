@@ -9,7 +9,8 @@
 
 //TODO alinear los datos a palabra.
 
-typedef char bool;
+//typedef char bool;
+typedef enum {TRUE, FALSE} bool;
 //#define NULL (void*)0
 typedef unsigned int flight_id;
 typedef int airport_id;
@@ -33,7 +34,7 @@ typedef struct __attribute__((packed)) {
 	airport_id destination;
 } DB_ENTRY;
 
-typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_CMD, OP_EXIT, OP_CONNECT, OP_OK, OP_ERROR, OP_PING, OP_PONG} OPCODE;
+typedef enum {OP_PURCHASE, OP_CONSULT, OP_CANCEL, OP_EXIT, OP_CONNECT, OP_PING, OP_PONG, OP_ADDFLIGHT} OPCODE;
 
 typedef struct {
 	size_t size;
@@ -76,7 +77,7 @@ typedef struct {
 										if(datagram->opcode==OP_CONSULT){\
 											printf("\tCantidad: %d\n\tOrigen: %d\n\tDestino: %d\n", datagram->dg_count, datagram->dg_origin, datagram->dg_destination);\
 											DUMP_RESULT_DATAGRAM(datagram);\
-										}else if(datagram->opcode==OP_CMD || datagram->opcode==OP_PING || datagram->opcode==OP_PONG){\
+										}else if(datagram->opcode==OP_PING || datagram->opcode==OP_PONG){\
 											printf("CMD: %s\n", datagram->dg_cmd);\
 										}\
 										printf("]\n");\
@@ -92,10 +93,12 @@ int db_open(const char* path);
 
 void db_close();
 
-res_id purchase(flight_id id);
+res_id db_purchase(flight_id id);
 
-DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination);
+DB_DATAGRAM* db_consult_flights(airport_id origin, airport_id destination);
 
-void cancel(res_id id);
+bool db_cancel(res_id id);
+
+int db_add_flight(time_t departure, int origin, int destination);
 
 #endif
