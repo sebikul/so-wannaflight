@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "config.h"
 #include "ipc.h"
@@ -20,7 +21,7 @@
 
 #define DUMP_ARGS(argc, argv)	{\
 									for (int i = 0; i < argc; i++) {\
-										printf("%s ", argv[i]);\
+										printf("<%s> ", argv[i]);\
 									}\
 									printf("\n");\
 								}
@@ -115,19 +116,43 @@ static void parse_answer(DB_DATAGRAM* datagram) {
 	case OP_CONSULT:
 		printf("Cantidad de vuelos encontrados: %d\n", datagram->dg_count);
 
-		DUMP_DATAGRAM(datagram);
+		for (int i = 0; i < datagram->dg_count; i++) {
 
-		// for(int i=0;i<datagram->dg_count;i++){
+			DB_ENTRY entry = datagram->dg_results[i];
+			char timebuf[32];
 
-		// }
+			strftime(timebuf, 32, "%d-%m-%Y %H:%M:%S", localtime(&entry.departure));
+
+			printf("Encontrado vuelo con ID #%d de %d a %d, con fecha de salida %s\n", entry.id, entry.origin, entry.destination, timebuf);
+
+		}
+
 		break;
 
 
+	case OP_PURCHASE:
+		printf("Compra exitosa. ID del ticket: %d\n", datagram->dg_seat);
+		break;
+
+	case OP_CANCEL:
+		if (datagram->dg_result) {
+			printf("Compra cancelada de forma exitosa.\n");
+		}
+		break;
+
+	case OP_ADDFLIGHT:
+		printf("Agregado el vuelo con ID #%d\n", datagram->dg_flightid);
+
+		break;
+
+	default:
+		printf("Datagrama desconocido:\n");
+
+		DUMP_DATAGRAM(datagram);
 
 	}
 
 }
-
 
 static void send_exit() {
 
@@ -178,6 +203,10 @@ int main(int argc, char** argv) {
 
 		buffer[n - 1] = 0;
 
+		putchar('\n');
+
+		//printf("<%s>\n", buffer);
+
 		if (strlen(buffer) == 0) {
 			continue;
 		}
@@ -189,6 +218,8 @@ int main(int argc, char** argv) {
 
 			DB_DATAGRAM *datagram;
 			struct shell_cmd cmd = parse_command(buffer);
+
+			//DUMP_ARGS(cmd.argc, cmd.argv);
 
 			if (strcmp(cmd.argv[0], "ping") == 0) {
 
@@ -210,17 +241,20 @@ int main(int argc, char** argv) {
 				datagram->dg_destination = -1;
 
 				int i = 1;
+				int had_error = 0;
 
-				printf("argc: %d\n", cmd.argc);
+				//printf("argc: %d\n", cmd.argc);
 
 				while (i < cmd.argc) {
 
-					printf("argc: %d, argv: <%s>\n", i, cmd.argv[i]);
+					//printf("argc: %d, argv: <%s>\n", i, cmd.argv[i]);
 
 					if (strcmp(cmd.argv[i], "to") == 0) {
 
 						if (cmd.argc == i + 1) {
 							printf("Comando invalido.\n");
+							had_error = 1;
+							break;
 						}
 
 						i++;
@@ -230,6 +264,8 @@ int main(int argc, char** argv) {
 
 						if (cmd.argc == i + 1) {
 							printf("Comando invalido.\n");
+							had_error = 1;
+							break;
 						}
 
 						i++;
@@ -237,11 +273,17 @@ int main(int argc, char** argv) {
 						i++;
 					} else {
 						printf("Comando invalido.\n");
+						had_error = 1;
+						break;
 					}
 
 				}
 
-				printf("Yendo de %d a %d\n", datagram->dg_origin, datagram->dg_destination);
+				if (had_error) {
+					continue;
+				}
+
+				//printf("Yendo de %d a %d\n", datagram->dg_origin, datagram->dg_destination);
 
 			} else if (strcmp(cmd.argv[0], "purchase") == 0) {
 
@@ -263,6 +305,28 @@ int main(int argc, char** argv) {
 
 				datagram->dg_seat = atoi(cmd.argv[1]);
 
+			} else  if (is_admin && strcmp(cmd.argv[0], "addflight") == 0) {
+
+				struct tm departure;
+
+				CHECK_ARGC(cmd.argc, 4);
+
+				datagram = (DB_DATAGRAM*) malloc(sizeof(DB_DATAGRAM));
+				datagram->size = sizeof(DB_DATAGRAM);
+				datagram->opcode = OP_ADDFLIGHT;
+
+				DB_ENTRY entry = datagram->dg_results[0];
+
+				datagram->dg_results[0].origin = atoi(cmd.argv[1]);
+				datagram->dg_results[0].destination = atoi(cmd.argv[2]);
+
+				strptime(cmd.argv[3], "%d-%m-%Y %H:%M:%S", &departure);
+				datagram->dg_results[0].departure = mktime(&departure);
+
+				char timebuf[32];
+				strftime(timebuf, 32, "%d-%m-%Y %H:%M:%S", localtime(&datagram->dg_results[0].departure));
+				printf("Agregando vuelo de %d a %d con fecha %s\n", datagram->dg_results[0].origin, datagram->dg_results[0].destination, timebuf);
+
 			} else {
 
 				if (strcmp(cmd.argv[0], "makeadmin") == 0) {
@@ -274,7 +338,7 @@ int main(int argc, char** argv) {
 
 				FREE_ARGV(cmd);
 
-				printf("Comando invalido.\n");
+				printf("Comando invalido -1.\n");
 
 				continue;
 
@@ -286,8 +350,10 @@ int main(int argc, char** argv) {
 			free(datagram);
 
 			datagram = ipc_receive(session);
-
 			parse_answer(datagram);
+			free(datagram);
+
+			putchar('\n');
 
 		}
 
