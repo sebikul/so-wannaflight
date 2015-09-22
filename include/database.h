@@ -12,7 +12,7 @@
 typedef char bool;
 //#define NULL (void*)0
 typedef unsigned int flight_id;
-typedef unsigned short airport_id;
+typedef int airport_id;
 typedef int res_id;
 
 typedef struct {
