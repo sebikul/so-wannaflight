@@ -16,6 +16,7 @@
 
 #define CHECK_ARGC(argc, expected) 	if (argc != expected) {\
 										printf("Cantidad de argumentos invalida.\n");\
+										FREE_ARGV(cmd);\
 										continue;\
 									}
 
@@ -123,7 +124,7 @@ static void parse_answer(DB_DATAGRAM* datagram) {
 
 			strftime(timebuf, 32, "%d-%m-%Y %H:%M:%S", localtime(&entry.departure));
 
-			printf("Encontrado vuelo con ID #%d de %d a %d, con fecha de salida %s\n", entry.id, entry.origin, entry.destination, timebuf);
+			printf("Encontrado vuelo con ID #%.4d de %d a %d, con fecha de salida %s\n", entry.id, entry.origin, entry.destination, timebuf);
 
 		}
 
@@ -131,7 +132,7 @@ static void parse_answer(DB_DATAGRAM* datagram) {
 
 
 	case OP_PURCHASE:
-		printf("Compra exitosa. ID del ticket: %d\n", datagram->dg_seat);
+		printf("Compra exitosa. ID del ticket: %.4d\n", datagram->dg_seat);
 		break;
 
 	case OP_CANCEL:
@@ -141,7 +142,7 @@ static void parse_answer(DB_DATAGRAM* datagram) {
 		break;
 
 	case OP_ADDFLIGHT:
-		printf("Agregado el vuelo con ID #%d\n", datagram->dg_flightid);
+		printf("Agregado el vuelo con ID #%.4d\n", datagram->dg_flightid);
 
 		break;
 
@@ -203,7 +204,7 @@ int main(int argc, char** argv) {
 
 		buffer[n - 1] = 0;
 
-		putchar('\n');
+		//putchar('\n');
 
 		//printf("<%s>\n", buffer);
 
@@ -308,6 +309,8 @@ int main(int argc, char** argv) {
 			} else  if (is_admin && strcmp(cmd.argv[0], "addflight") == 0) {
 
 				struct tm departure;
+				char timebuf[32];
+				DB_ENTRY entry;
 
 				CHECK_ARGC(cmd.argc, 4);
 
@@ -315,15 +318,19 @@ int main(int argc, char** argv) {
 				datagram->size = sizeof(DB_DATAGRAM);
 				datagram->opcode = OP_ADDFLIGHT;
 
-				DB_ENTRY entry = datagram->dg_results[0];
+				entry = datagram->dg_results[0];
 
 				datagram->dg_results[0].origin = atoi(cmd.argv[1]);
 				datagram->dg_results[0].destination = atoi(cmd.argv[2]);
 
-				strptime(cmd.argv[3], "%d-%m-%Y %H:%M:%S", &departure);
+				if (strptime(cmd.argv[3], "%d-%m-%Y %H:%M:%S", &departure) == NULL) {
+					printf("Comando invalido.\n");
+					FREE_ARGV(cmd);
+					continue;
+				}
+
 				datagram->dg_results[0].departure = mktime(&departure);
 
-				char timebuf[32];
 				strftime(timebuf, 32, "%d-%m-%Y %H:%M:%S", localtime(&datagram->dg_results[0].departure));
 				printf("Agregando vuelo de %d a %d con fecha %s\n", datagram->dg_results[0].origin, datagram->dg_results[0].destination, timebuf);
 
@@ -353,7 +360,7 @@ int main(int argc, char** argv) {
 			parse_answer(datagram);
 			free(datagram);
 
-			putchar('\n');
+			//putchar('\n');
 
 		}
 
