@@ -265,6 +265,9 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 	key_t shmemkey = datagram->dg_shmemkey;
 
+	//Reseteamos la pagina a 0 para evitar confuciones en el protocolo
+	memset(datagram, 0, SHMEM_SIZE);
+
 	shmem_detach(session);
 
 	shmem_init_with_key(session, shmemkey);
