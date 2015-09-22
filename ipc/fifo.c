@@ -102,6 +102,7 @@ void ipc_sync(ipc_session session) {
 	char newpath_w[64];
 	char newpath_base[64];
 	DB_DATAGRAM* datagram;
+	int size;
 
 	sprintf(newpath_r, "%s-%d-r", FIFO_INITIAL_PATH, cli_count);
 	printf("Creando nuevo FIFO de lectura: %s\n", newpath_r);
@@ -117,16 +118,19 @@ void ipc_sync(ipc_session session) {
 		exit(1);
 	}
 
-	datagram = malloc(DATAGRAM_MAXSIZE);
-
 	//A esta altura los FIFO existen en el fs, pero nadie esta conectado. Falta mandarselos
 	//al cliente, y luego reemplazar los actuales para poder aceptar al proximo cliente.
 
 	//Creamos el prefijo del path para pasarselo al cliente y que lo use
 	//para conectarse a los nuevos FIFO.
+
 	sprintf(newpath_base, "%s-%d", FIFO_INITIAL_PATH, cli_count);
+	size = sizeof(DB_DATAGRAM) + strlen(newpath_base) + 1;
+
+	datagram = malloc(size);
+
 	strcpy(datagram->dg_cmd, newpath_base);
-	datagram->size = sizeof(DB_DATAGRAM) + strlen(datagram->dg_cmd);
+	datagram->size = size;
 
 	//DUMP_DATAGRAM(datagram);
 
@@ -155,9 +159,12 @@ void ipc_sync(ipc_session session) {
 
 	datagram = ipc_receive(session);
 
-	//DUMP_DATAGRAM(datagram);
+	if (datagram->opcode != OP_CONNECT) {
+		CLIPRINTE("Error en el protocolo de sincronizacion 2.\n");
+		DUMP_DATAGRAM(datagram);
+		exit(1);
+	}
 
-	printf("Cliente sincronizado! %s\n", datagram->dg_cmd);
 	free(datagram);
 }
 
@@ -191,7 +198,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 	printf("Escribiendo pedido de conexion...\n");
 
-	datagram = (DB_DATAGRAM*) malloc(DATAGRAM_MAXSIZE);
+	datagram = (DB_DATAGRAM*) malloc(sizeof(DB_DATAGRAM));
 	datagram->opcode = OP_CONNECT;
 	datagram->size = sizeof(DB_DATAGRAM);
 
@@ -219,11 +226,9 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_r);
 	session->serverfd_r = open(newpath_r, O_WRONLY);
 
-	strcpy(datagram->dg_cmd, "Hola!!!!");
-	datagram->size = sizeof(DB_DATAGRAM) + strlen(datagram->dg_cmd);
-	datagram->opcode = OP_CMD;
-
-	//DUMP_DATAGRAM(datagram);
+	datagram = realloc(datagram, sizeof(DB_DATAGRAM));
+	datagram->size = sizeof(DB_DATAGRAM);
+	datagram->opcode = OP_CONNECT;
 
 	ipc_send(session, datagram);
 	free(datagram);
@@ -259,6 +264,8 @@ DB_DATAGRAM* ipc_receive(ipc_session session) {
 #endif
 
 	datagram->size = size;
+
+	datagram = realloc(datagram, datagram->size);
 
 	return datagram;
 }

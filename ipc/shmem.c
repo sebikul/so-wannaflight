@@ -30,18 +30,18 @@ extern int cli_count;
 static void shmem_init_with_key(ipc_session session, key_t shmemkey) {
 
 	if ( (session->memid = shmget(shmemkey, SHMEM_SIZE, IPC_CREAT | 0666)) == -1 ) {
-		printf("shmget failed.\n");
+		SRVPRINTE("shmget failed.\n");
 		exit(1);
 	}
 
 	if ( !(session->alloc = shmat(session->memid, NULL, 0)) ) {
-		printf("shmget failed.\n");
+		SRVPRINTE("shmget failed.\n");
 		exit(1);
 	}
 
 	memset(session->alloc, 0, SHMEM_SIZE);
 
-	//printf("Shared memory inicializado con id %d\n", shmem.memid);
+	SRVPRINT("Shared memory inicializado con id %d\n", session->memid);
 
 }
 
@@ -168,7 +168,6 @@ void ipc_accept(ipc_session session) {
 
 void ipc_sync(ipc_session session) {
 
-
 	CLIPRINTE("Fork creado, esperando pedido de memoria.\n");
 
 	//STEP-1
@@ -186,8 +185,6 @@ void ipc_sync(ipc_session session) {
 
 	//shmem.alloc tiene el pedido de una zona de memoria.
 
-	//DUMP_SHMEM_DATA();
-
 	datagram->dg_shmemkey = ftok("../database.sqlite", cli_count);
 
 	int oldsemid = session->semid;
@@ -201,8 +198,6 @@ void ipc_sync(ipc_session session) {
 
 	//Reseteamos los nuevos semaforos
 	sem_reset(session);
-
-	//DUMP_SHMEM_DATA()
 
 	CLIPRINTE("Enviando id de zona de memoria.\n");
 
@@ -218,8 +213,6 @@ void ipc_sync(ipc_session session) {
 	CLIPRINTE("Sincronizacion completa. Esperando comandos...\n");
 
 	UNBLOCK_QUEUE(SEM_SRV_QUEUE);
-
-	//PRINT_SEM_VALUES;//Ambos semaforos en 0
 
 }
 

@@ -143,6 +143,8 @@ DB_DATAGRAM* ipc_receive(ipc_session session) {
 
 		datagram->size = size;
 
+		datagram = realloc(datagram, datagram->size);
+
 		return datagram;
 
 	} else if (size == 0) {

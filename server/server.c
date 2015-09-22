@@ -70,6 +70,8 @@ void serve() {
 
 		case OP_CANCEL:
 
+			cancel(datagram->dg_seat);
+
 			ans = malloc(sizeof(DB_DATAGRAM));
 			ans->size = sizeof(DB_DATAGRAM);
 			ans->opcode = OP_OK;

@@ -185,7 +185,7 @@ res_id purchase(flight_id id) {
 
 DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
 
-    char query[128];
+    char query[128] = {0};
     sqlite3_stmt * statement;
     DB_DATAGRAM* datagram;
     int rowcount = 0;
@@ -224,6 +224,8 @@ DB_DATAGRAM* consult_flights(airport_id origin, airport_id destination) {
     datagram->dg_count = rowcount;
     datagram->size = sizeof(DB_DATAGRAM) + rowcount * sizeof(DB_ENTRY);
     datagram->opcode = OP_CONSULT;
+
+    datagram = realloc(datagram, datagram->size);
 
     return datagram;
 }
