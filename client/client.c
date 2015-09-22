@@ -25,6 +25,13 @@
 									printf("\n");\
 								}
 
+#define FREE_ARGV(cmd)  {\
+									for (int i = 0; i < cmd.argc; i++) {\
+										free(cmd.argv[i]);\
+									}\
+									free(cmd.argv);\
+								}
+
 static ipc_session session;
 static int is_admin = 0;
 
@@ -261,12 +268,11 @@ int main(int argc, char** argv) {
 				if (strcmp(cmd.argv[0], "makeadmin") == 0) {
 					is_admin = 1;
 					printf("Privilegios de administrador activados!\n");
+					FREE_ARGV(cmd);
+					continue;
 				}
 
-				for (int i = 0; i < cmd.argc; i++) {
-					free(cmd.argv[i]);
-				}
-				free(cmd.argv);
+				FREE_ARGV(cmd);
 
 				printf("Comando invalido.\n");
 
@@ -274,10 +280,7 @@ int main(int argc, char** argv) {
 
 			}
 
-			for (int i = 0; i < cmd.argc; i++) {
-				free(cmd.argv[i]);
-			}
-			free(cmd.argv);
+			FREE_ARGV(cmd);
 
 			ipc_send(session, datagram);
 			free(datagram);
