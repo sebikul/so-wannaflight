@@ -260,9 +260,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 	printf("Recibiendo zona de memoria...\n");
 
-	//STEP-3
-	UNBLOCK(SEM_CLIENT);
-
+	int oldsemid = session->semid;
 	key_t shmemkey = datagram->dg_shmemkey;
 
 	//Reseteamos la pagina a 0 para evitar confuciones en el protocolo
@@ -273,13 +271,12 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	shmem_init_with_key(session, shmemkey);
 	sem_init_with_key(&session->semid, shmemkey, 2);
 
-	//DUMP_SHMEM_DATA();
+	//STEP-3
+	sem_up(oldsemid, SEM_CLIENT);
 
 	UNBLOCK_QUEUE(SEM_QUEUE); //Cuando terminamos de crear la conexion, se libera el servidor
 
 	printf("Listo para enviar comandos...\n");
-
-	//PRINT_SEM_VALUES;//Ambos semaforos en 0
 
 	return 0;
 }
