@@ -178,11 +178,20 @@ static bool remove_ticket(res_id id) {
 
 res_id db_purchase(flight_id id) {
 
+    res_id ans;
+
+    sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+
     if (!db_flight_exists(id)) {
         return -1;
     }
 
-    return add_ticket(id);
+    ans = add_ticket(id);
+
+    sqlite3_exec(db, "END TRANSACTION;", NULL, NULL, NULL);
+
+    return ans;
+
 }
 
 DB_DATAGRAM* db_consult_flights(airport_id origin, airport_id destination) {

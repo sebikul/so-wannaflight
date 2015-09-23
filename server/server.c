@@ -133,7 +133,6 @@ int main(int argc, char** argv) {
 #endif
 
 	printf("Opening database...\n");
-	db_open(DB_PATH);
 
 	session = ipc_newsession();
 	err = ipc_listen(session, argc - 1, ++argv);
@@ -156,6 +155,7 @@ int main(int argc, char** argv) {
 
 		case 0: /* hijo */
 			ipc_sync(session);
+			db_open(DB_PATH);
 			serve();
 			return 0;
 			break;
