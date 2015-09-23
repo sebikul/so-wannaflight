@@ -40,6 +40,10 @@ typedef struct {
 	size_t size;
 	OPCODE opcode;
 
+#ifdef MSGQUEUE
+	int sender;
+#endif
+
 	union {
 		int 		_count;
 		res_id  	_seat;
@@ -72,13 +76,19 @@ typedef struct {
 #define DUMP_DBENTRY(entry)			printf("[DB_ENTRY][\n\t\tVuelo ID: %d\n\t\tSalida: %lld\n\t\tOrigen: %d\n\t\tDestino: %d\n]\n",\
 										 entry.id, (long long)entry.departure, entry.origin, entry.destination)
 
+#ifdef MSGQUEUE
+#define DATAGRAM_PRINT(datagram) printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n\tsender: %d\n", datagram->size, datagram->opcode, datagram->sender);
+#else
+#define DATAGRAM_PRINT(datagram) printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n", datagram->size, datagram->opcode);
+#endif
+
 #define DUMP_DATAGRAM(datagram)		{\
-										printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n", datagram->size, datagram->opcode);\
+										DATAGRAM_PRINT(datagram)\
 										if(datagram->opcode==OP_CONSULT){\
 											printf("\tCantidad: %d\n\tOrigen: %d\n\tDestino: %d\n", datagram->dg_count, datagram->dg_origin, datagram->dg_destination);\
 											DUMP_RESULT_DATAGRAM(datagram);\
 										}else if(datagram->opcode==OP_PING || datagram->opcode==OP_PONG){\
-											printf("CMD: %s\n", datagram->dg_cmd);\
+											printf("\tCMD: %s\n", datagram->dg_cmd);\
 										}\
 										printf("]\n");\
 									}
