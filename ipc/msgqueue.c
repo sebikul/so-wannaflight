@@ -152,7 +152,7 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 
 	memcpy(&message->datagram, data, data->size);
 
-	DUMP_DATAGRAM((&message->datagram));
+	//DUMP_DATAGRAM((&message->datagram));
 
 #ifdef SERVER
 	msgsnd(session->queueid_w, message, data->size, 0);
@@ -180,7 +180,7 @@ DB_DATAGRAM* ipc_receive(ipc_session session) {
 	datagram = malloc(ans->datagram.size);
 	memcpy(datagram, &ans->datagram, ans->datagram.size);
 
-	DUMP_DATAGRAM(datagram);
+	//DUMP_DATAGRAM(datagram);
 
 #ifdef SERVER
 	datagram->sender = ans->mtype;
