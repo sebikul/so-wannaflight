@@ -287,3 +287,7 @@ void ipc_free(ipc_session session) {
 
 	free(session);
 }
+
+bool ipc_shouldfork(){
+	return TRUE;
+}
