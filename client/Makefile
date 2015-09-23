@@ -17,7 +17,7 @@ filesig:
 	gcc $(GCCFLAGS) -o client-filesig ../ipc/filesig.c
 
 msgqueue:
-	gcc $(GCCFLAGS) -o client-msgqueue ../ipc/msgqueue.c
+	gcc $(GCCFLAGS) -DMSGQUEUE  -o client-msgqueue ../ipc/msgqueue.c
 
 clean: 
 	rm -f *.o
