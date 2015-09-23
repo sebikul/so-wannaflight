@@ -25,12 +25,32 @@ struct session_t {
 extern int cli_count;
 #endif
 
-static void shmem_init_with_key(ipc_session session, key_t shmemkey) {
+static void shmem_init_with_key(ipc_session session, key_t shmemkey, int flags) {
 
-	if ( (session->memid = shmget(shmemkey, SHMEM_SIZE, IPC_CREAT | 0666)) == -1 ) {
+	if ( (session->memid = shmget(shmemkey, SHMEM_SIZE, flags | 0666)) == -1 ) {
 		SRVPRINTE("shmget failed.\n");
 		exit(1);
 	}
+
+}
+
+#ifdef SERVER
+static void shmem_create_with_key(ipc_session session, key_t shmemkey) {
+
+	shmem_init_with_key(session, shmemkey, IPC_CREAT | IPC_EXCL);
+
+}
+#endif
+
+#ifdef CLIENT
+static void shmem_get_with_key(ipc_session session, key_t shmemkey) {
+
+	shmem_init_with_key(session, shmemkey, 0);
+
+}
+#endif
+
+static void shmem_attach_with_key(ipc_session session, key_t shmemkey) {
 
 	if ( !(session->alloc = shmat(session->memid, NULL, 0)) ) {
 		SRVPRINTE("shmget failed.\n");
@@ -40,17 +60,6 @@ static void shmem_init_with_key(ipc_session session, key_t shmemkey) {
 	memset(session->alloc, 0, SHMEM_SIZE);
 
 	SRVPRINT("Shared memory inicializado con id %d\n", session->memid);
-
-}
-
-/*
-	Crea la zona de memoria compartida
- */
-static void shmem_init(ipc_session session) {
-
-	key_t shmemkey = ftok("../database.sqlite", 0);
-
-	shmem_init_with_key(session, shmemkey);
 
 }
 
@@ -135,9 +144,13 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 #ifdef SERVER
 int ipc_listen(ipc_session session, int argc, char** args) {
 
+	key_t shmemkey;
+
 	SRVPRINTE("Inicializando IPC de shared memory...\n");
 
-	shmem_init(session);
+	shmemkey = ftok("../database.sqlite", 0);
+	shmem_create_with_key(session, shmemkey);
+	shmem_attach_with_key(session, shmemkey);
 
 	sem_init(&session->semid, 2);
 	sem_queue_init(&session->queueid, 2);
@@ -192,7 +205,9 @@ void ipc_sync(ipc_session session) {
 
 	shmem_detach(session);
 
-	shmem_init_with_key(session, shmemkey);
+	shmem_create_with_key(session, shmemkey);
+	shmem_attach_with_key(session, shmemkey);
+
 	sem_init_with_key(&session->semid, shmemkey, 2);
 
 	//Reseteamos los nuevos semaforos
@@ -227,10 +242,13 @@ void ipc_waitsync(ipc_session session) {
 int ipc_connect(ipc_session session, int argc, char** args) {
 
 	DB_DATAGRAM *datagram;
+	key_t shmemkey;
 
 	printf("Conectando con el servidor...\n");
 
-	shmem_init(session);
+	shmemkey = ftok("../database.sqlite", 0);
+	shmem_get_with_key(session, shmemkey);
+	shmem_attach_with_key(session, shmemkey);
 
 	sem_init(&session->semid, 2);
 	sem_queue_init(&session->queueid, 2);
@@ -260,14 +278,15 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	printf("Recibiendo zona de memoria...\n");
 
 	int oldsemid = session->semid;
-	key_t shmemkey = datagram->dg_shmemkey;
+	shmemkey = datagram->dg_shmemkey;
 
 	//Reseteamos la pagina a 0 para evitar confuciones en el protocolo
 	memset(datagram, 0, SHMEM_SIZE);
 
 	shmem_detach(session);
 
-	shmem_init_with_key(session, shmemkey);
+	shmem_get_with_key(session, shmemkey);
+	shmem_attach_with_key(session, shmemkey);
 	sem_init_with_key(&session->semid, shmemkey, 2);
 
 	//STEP-3
@@ -306,6 +325,6 @@ void ipc_free(ipc_session session) {
 
 }
 
-bool ipc_shouldfork(){
+bool ipc_shouldfork() {
 	return TRUE;
 }
