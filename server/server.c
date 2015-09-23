@@ -39,6 +39,7 @@ void serve() {
 		DB_DATAGRAM* datagram, *ans;
 
 		datagram = ipc_receive(session);
+		//DUMP_DATAGRAM(datagram);
 
 		switch (datagram->opcode) {
 
@@ -110,6 +111,10 @@ void serve() {
 			continue;
 		}
 
+#ifdef MSGQUEUE
+		ans->sender = datagram->sender;
+#endif
+
 		free(datagram);
 
 		//DUMP_DATAGRAM(datagram);
@@ -121,7 +126,7 @@ void serve() {
 
 int main(int argc, char** argv) {
 	int err;
-	int pid;
+	int pid = 0;
 
 	system("clear");
 	printf("Starting server...\n");
@@ -147,7 +152,11 @@ int main(int argc, char** argv) {
 		ipc_accept(session);
 		cli_count++;
 
-		switch (pid = fork()) {
+		if (ipc_shouldfork()) {
+			pid = fork();
+		}
+
+		switch (pid) {
 		case -1:
 			printf("fork failed.\n");
 			exit(1);
