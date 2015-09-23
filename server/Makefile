@@ -20,7 +20,7 @@ fifo: sqlite3
 	gcc $(GCCFLAGS) -DFIFO -o server-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
 
 filesig: sqlite3
-	gcc $(GCCFLAGS) -DFIFO -o server-filesig ../ipc/filesig.c  ../ipc/lib/semaphore.c
+	gcc $(GCCFLAGS) -DFILESIG -o server-filesig ../ipc/filesig.c
 
 clean: 
 	cd sqlite3; make clean

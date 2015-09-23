@@ -14,7 +14,7 @@ fifo:
 	gcc $(GCCFLAGS) -o client-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
 
 filesig:
-	gcc $(GCCFLAGS) -DFIFO -o client-filesig ../ipc/filesig.c  ../ipc/lib/semaphore.c
+	gcc $(GCCFLAGS) -o client-filesig ../ipc/filesig.c
 
 clean: 
 	rm -f *.o

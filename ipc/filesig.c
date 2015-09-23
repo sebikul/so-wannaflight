@@ -1,7 +1,6 @@
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
-#include "semaphore.h"
 
 struct session_t {
 

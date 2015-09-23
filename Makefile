@@ -19,5 +19,13 @@ shmem:
 socket:
 	cd server; make socket
 	cd client; make socket
+
+fifo:
+	cd server; make fifo
+	cd client; make fifo
+
+filesig:
+	cd server; make filesig
+	cd client; make filesig
 	
 .PHONY: all clean server client
