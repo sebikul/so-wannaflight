@@ -27,5 +27,9 @@ fifo:
 filesig:
 	cd server; make filesig
 	cd client; make filesig
+
+msgqueue:
+	cd server; make msgqueue
+	cd client; make msgqueue
 	
 .PHONY: all clean server client

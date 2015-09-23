@@ -1,8 +1,8 @@
 GCCFLAGS=-Wall -ggdb -DSERVER -pthread -ldl -I../include sqlite3/sqlite3.o server.c db/database.c
 
-.PHONY: all clean sqlite3 socket shmem fifo
+.PHONY: all clean sqlite3 socket shmem fifo filesig msgqueue
 
-all: shmem socket fifo filesig
+all: shmem socket fifo filesig msgqueue
 
 run: clean server.o
 	./server
@@ -21,6 +21,9 @@ fifo: sqlite3
 
 filesig: sqlite3
 	gcc $(GCCFLAGS) -DFILESIG -o server-filesig ../ipc/filesig.c
+
+msgqueue:
+	gcc $(GCCFLAGS) -DMSGQUEUE -o server-msgqueue ../ipc/msgqueue.c
 
 clean: 
 	cd sqlite3; make clean

@@ -12,8 +12,6 @@
 
 struct session_t {
 
-	int clientid;
-
 	int semid;
 	int queueid;
 
