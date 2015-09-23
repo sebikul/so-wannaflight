@@ -34,6 +34,10 @@
 									free(cmd.argv);\
 								}
 
+
+#define COLOR_GREEN   "\x1b[32m"
+#define COLOR_RESET   "\x1b[0m"
+
 static ipc_session session;
 static int is_admin = 0;
 
@@ -107,6 +111,7 @@ struct shell_cmd parse_command(char* command) {
 
 static void parse_answer(DB_DATAGRAM* datagram) {
 
+	printf(COLOR_GREEN);
 
 	switch (datagram->opcode) {
 
@@ -132,11 +137,15 @@ static void parse_answer(DB_DATAGRAM* datagram) {
 
 
 	case OP_PURCHASE:
-		printf("Compra exitosa. ID del ticket: %.4d\n", datagram->dg_seat);
+		if (datagram->dg_seat == -1) {
+			printf("El vuelo ingresado no existe.\n");
+		} else {
+			printf("Compra exitosa. ID del ticket: %.4d\n", datagram->dg_seat);
+		}
 		break;
 
 	case OP_CANCEL:
-		if (datagram->dg_result) {
+		if (datagram->dg_result == TRUE) {
 			printf("Compra cancelada de forma exitosa.\n");
 		}
 		break;
@@ -152,6 +161,8 @@ static void parse_answer(DB_DATAGRAM* datagram) {
 		DUMP_DATAGRAM(datagram);
 
 	}
+
+	printf(COLOR_RESET "\n");
 
 }
 
@@ -197,8 +208,11 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	printf("-----------------------------------------------------------------\n");
-	printf("Los comandos disponibles son: consultar, comprar, cancelar, salir\n");
+	printf("----------------------------------\n");
+	printf(COLOR_GREEN "Ejecute 'help' para obtener ayuda.\n" COLOR_RESET);
+	printf("$ > ");
+
+	fflush(stdout);
 
 	while ((n = read(0, buffer, DATAGRAM_MAXSIZE)) > 0 ) {
 
@@ -338,8 +352,10 @@ int main(int argc, char** argv) {
 
 				if (strcmp(cmd.argv[0], "makeadmin") == 0) {
 					is_admin = 1;
-					printf("Privilegios de administrador activados!\n");
+					printf(COLOR_GREEN "Privilegios de administrador activados!\n\n" COLOR_RESET);
 					FREE_ARGV(cmd);
+					printf("$ > ");
+					fflush(stdout);
 					continue;
 				}
 
@@ -359,6 +375,9 @@ int main(int argc, char** argv) {
 			datagram = ipc_receive(session);
 			parse_answer(datagram);
 			free(datagram);
+
+			printf("$ > ");
+			fflush(stdout);
 
 			//putchar('\n');
 
