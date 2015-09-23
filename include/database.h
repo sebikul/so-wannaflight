@@ -10,7 +10,7 @@
 //TODO alinear los datos a palabra.
 
 //typedef char bool;
-typedef enum {TRUE, FALSE} bool;
+typedef enum {FALSE, TRUE} bool;
 //#define NULL (void*)0
 typedef unsigned int flight_id;
 typedef int airport_id;

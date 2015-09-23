@@ -63,14 +63,14 @@ static void db_create() {
 
 
     sql = "CREATE TABLE ticket("
-          "resid    INT  PRIMARY KEY AUTOINCREMENT,"
-          "flightid INT              NOT NULL );"
+          "resid    INTEGER  PRIMARY KEY AUTOINCREMENT,"
+          "flightid INTEGER              NOT NULL );"
 
           "CREATE TABLE flight("
-          "id             INT PRIMARY KEY AUTOINCREMENT,"
-          "departure      INT                NOT NULL,"
-          "origin         INT                NOT NULL,"
-          "destination    INT                NOT NULL );";
+          "id             INTEGER PRIMARY KEY AUTOINCREMENT,"
+          "departure      INTEGER                NOT NULL,"
+          "origin         INTEGER                NOT NULL,"
+          "destination    INTEGER                NOT NULL );";
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
