@@ -50,7 +50,7 @@ static void shmem_get_with_key(ipc_session session, key_t shmemkey) {
 }
 #endif
 
-static void shmem_attach_with_key(ipc_session session, key_t shmemkey) {
+static void shmem_attach(ipc_session session) {
 
 	if ( !(session->alloc = shmat(session->memid, NULL, 0)) ) {
 		SRVPRINTE("shmget failed.\n");
@@ -150,7 +150,7 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 
 	shmemkey = ftok("../database.sqlite", 0);
 	shmem_create_with_key(session, shmemkey);
-	shmem_attach_with_key(session, shmemkey);
+	shmem_attach(session);
 
 	sem_init(&session->semid, 2);
 	sem_queue_init(&session->queueid, 2);
@@ -206,7 +206,7 @@ void ipc_sync(ipc_session session) {
 	shmem_detach(session);
 
 	shmem_create_with_key(session, shmemkey);
-	shmem_attach_with_key(session, shmemkey);
+	shmem_attach(session);
 
 	sem_init_with_key(&session->semid, shmemkey, 2);
 
@@ -248,7 +248,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 
 	shmemkey = ftok("../database.sqlite", 0);
 	shmem_get_with_key(session, shmemkey);
-	shmem_attach_with_key(session, shmemkey);
+	shmem_attach(session);
 
 	sem_init(&session->semid, 2);
 	sem_queue_init(&session->queueid, 2);
@@ -286,7 +286,7 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	shmem_detach(session);
 
 	shmem_get_with_key(session, shmemkey);
-	shmem_attach_with_key(session, shmemkey);
+	shmem_attach(session);
 	sem_init_with_key(&session->semid, shmemkey, 2);
 
 	//STEP-3

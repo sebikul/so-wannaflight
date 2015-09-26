@@ -1,4 +1,4 @@
-GCCFLAGS=-Wall -ggdb -DSERVER -pthread -ldl -I../include sqlite3/sqlite3.o server.c db/database.c
+GCCFLAGS=-Wall -Wextra -pedantic -Wno-unused-parameter -g -DSERVER -pthread -ldl -I../include sqlite3/sqlite3.o server.c db/database.c libserver.c
 
 .PHONY: all clean sqlite3 socket shmem fifo filesig msgqueue
 
