@@ -1,23 +1,30 @@
-GCCFLAGS=-Wall -g -DCLIENT -I../include client.c
+GCCFLAGS=-Wall -Wextra -pedantic -Wno-unused-parameter -g -DCLIENT -I../include 
+SOURCES=client.c libclient.c
 
-.PHONY: all clean shmem socket fifo filesig msgqueue
+.PHONY: all clean shmem socket fifo filesig msgqueue sqlite3 localclient
 
-all: shmem socket fifo filesig msgqueue
+all: shmem socket fifo filesig msgqueue localclient
 
 shmem:
-	gcc $(GCCFLAGS) -o client-shmem ../ipc/shmem.c  ../ipc/lib/semaphore.c
+	gcc $(GCCFLAGS) $(SOURCES) -o client-shmem ../ipc/shmem.c  ../ipc/lib/semaphore.c
 
 socket:
-	gcc $(GCCFLAGS) -o client-socket ../ipc/socket.c
+	gcc $(GCCFLAGS) $(SOURCES) -o client-socket ../ipc/socket.c
 
 fifo:
-	gcc $(GCCFLAGS) -o client-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
+	gcc $(GCCFLAGS) $(SOURCES) -o client-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
 
 filesig:
-	gcc $(GCCFLAGS) -o client-filesig ../ipc/filesig.c
+	gcc $(GCCFLAGS) $(SOURCES) -o client-filesig ../ipc/filesig.c
 
 msgqueue:
-	gcc $(GCCFLAGS) -DMSGQUEUE  -o client-msgqueue ../ipc/msgqueue.c
+	gcc $(GCCFLAGS) $(SOURCES) -DMSGQUEUE  -o client-msgqueue ../ipc/msgqueue.c
+
+localclient: sqlite3
+	gcc $(GCCFLAGS) -I../server localclient.c libclient.c ../server/{libserver.c,db/database.c,sqlite3/sqlite3.o}  -o localclient 
+
+sqlite3:
+	cd ../server/sqlite3; make all
 
 clean: 
 	rm -f *.o

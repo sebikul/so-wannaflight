@@ -5,11 +5,13 @@
 			"file_exclude_patterns":
 			[
 				"client/client-*",
-				"server/server-*"
+				"server/server-*",
+				"client/localclient$"
 			],
 			"folder_exclude_patterns":
 			[
 				"client/client-*.*",
+				"client/localclient.*",
 				"server/server-*.*"
 			],
 			"path": "."

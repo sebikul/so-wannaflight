@@ -1,9 +1,11 @@
 
 server/server-*
 client/client-*
+client/localclient
 
 client/client-*.*/*
-client/client.*/*
+client/client\.*/*
+client/localclient.*/*
 
 server/server-*.*/*
 

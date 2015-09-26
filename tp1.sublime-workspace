@@ -1,1 +1,1312 @@
-{}
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"shme",
+				"shmem_get_with_key"
+			],
+			[
+				"shmem",
+				"shmem_attach_with_key"
+			],
+			[
+				"CL",
+				"CLIENT"
+			],
+			[
+				"CLI",
+				"CLIENT	(fifo.c)"
+			],
+			[
+				"data",
+				"datagram"
+			],
+			[
+				"msg",
+				"msgqueue_receive_from"
+			],
+			[
+				"ser",
+				"serverpid"
+			],
+			[
+				"CLIENT",
+				"CLIENT	(shmem.c)"
+			],
+			[
+				"msgq",
+				"msgqueue_init"
+			],
+			[
+				"sess",
+				"session"
+			],
+			[
+				"COL",
+				"COLOR_RESET"
+			],
+			[
+				"DU",
+				"DUMP_DATAGRAM	(server.c)"
+			],
+			[
+				"dG_res",
+				"dg_results"
+			],
+			[
+				"arg",
+				"argv"
+			],
+			[
+				"des",
+				"destination"
+			],
+			[
+				"ti",
+				"time"
+			],
+			[
+				"time",
+				"timebuf"
+			],
+			[
+				"DUM",
+				"DUMP_ARGS"
+			],
+			[
+				"SR",
+				"SRVPRINT	(ipc.h)"
+			],
+			[
+				"has",
+				"has_to_populate"
+			],
+			[
+				"DUMP",
+				"DUMP_DATAGRAM"
+			],
+			[
+				"dg_c",
+				"dg_count	(database.c)"
+			],
+			[
+				"pars",
+				"parse_answer"
+			],
+			[
+				"OP_CO",
+				"OP_CONSULT	(server.c)"
+			],
+			[
+				"cot",
+				"continue	(server.c)"
+			],
+			[
+				"shel",
+				"shell_cmd"
+			],
+			[
+				"DATA",
+				"DATAGRAM_MAXSIZE"
+			],
+			[
+				"cons",
+				"consult_flights	(database.h)"
+			],
+			[
+				"OP",
+				"OP_CONSULT"
+			],
+			[
+				"OP_C",
+				"OP_CONSULT"
+			],
+			[
+				"OP_",
+				"OP_CANCEL	(database.h)"
+			],
+			[
+				"send",
+				"send_exit"
+			],
+			[
+				"remo",
+				"remove_ticket"
+			],
+			[
+				"ip",
+				"ipc_disconnect"
+			],
+			[
+				"pa",
+				"path_w"
+			],
+			[
+				"path",
+				"path_w"
+			],
+			[
+				"SQL",
+				"SQLITE_STATEMENT_EXPECT"
+			],
+			[
+				"flig",
+				"flight_id"
+			],
+			[
+				"DB_E",
+				"DB_EXEC"
+			],
+			[
+				"res",
+				"res_id"
+			],
+			[
+				"fli",
+				"flight_id"
+			],
+			[
+				"DB",
+				"DB_FINALIZE_STATEMENT"
+			],
+			[
+				"size",
+				"size	(fifo.c)"
+			],
+			[
+				"file",
+				"file_exist"
+			],
+			[
+				"cli",
+				"cli_count	(server.c)"
+			],
+			[
+				"in",
+				"include"
+			],
+			[
+				"sema",
+				"semaphore	(shmem.c)"
+			],
+			[
+				"newpa",
+				"newpath_w"
+			],
+			[
+				"o_",
+				"O_WRONLY"
+			],
+			[
+				"new",
+				"newpath_w"
+			],
+			[
+				"O_RD",
+				"O_RDONLY"
+			],
+			[
+				"O_",
+				"O_WRONLY"
+			],
+			[
+				"ipc_se",
+				"ipc_send"
+			],
+			[
+				"old",
+				"oldsrvfd_w"
+			],
+			[
+				"siz",
+				"sizeof"
+			],
+			[
+				"sincroni",
+				"sincronizado	(ipc.h)"
+			],
+			[
+				"server",
+				"serverfd_w"
+			],
+			[
+				"OPC",
+				"OP_CONNECT"
+			],
+			[
+				"op",
+				"opcode"
+			],
+			[
+				"FIFO",
+				"FIFO_INITIAL_PATH"
+			],
+			[
+				"FIF",
+				"FIFO_INITIAL_PATH"
+			],
+			[
+				"ipc",
+				"ipc_session"
+			],
+			[
+				"sock",
+				"socketfd"
+			],
+			[
+				"soc",
+				"socketfd"
+			],
+			[
+				"SOC",
+				"SOCKETFD"
+			],
+			[
+				"SER",
+				"SERVIDOR"
+			],
+			[
+				"close",
+				"close_client"
+			],
+			[
+				"typ",
+				"typedef	(shmem.c)"
+			],
+			[
+				"end",
+				"endif"
+			],
+			[
+				"sem_q",
+				"sem_queue_destroy"
+			],
+			[
+				"PR",
+				"PRINT_QSEM_VALUES"
+			],
+			[
+				"SEM_",
+				"SEM_SRV_QUEUE"
+			],
+			[
+				"SERVER",
+				"SERVER"
+			],
+			[
+				"P",
+				"PRINT_SEM_VALUES"
+			],
+			[
+				"clie",
+				"client_ip"
+			],
+			[
+				"UN",
+				"UNBLOCK"
+			],
+			[
+				"client",
+				"clientfd"
+			],
+			[
+				"socket",
+				"socketfd"
+			],
+			[
+				"mem",
+				"memid"
+			],
+			[
+				"prin",
+				"PRINT_SEM_VALUES"
+			],
+			[
+				"sem_i",
+				"sem_init_with_key"
+			],
+			[
+				"W",
+				"WAIT_FOR_QUEUE"
+			],
+			[
+				"que",
+				"queueid"
+			],
+			[
+				"q",
+				"queueid"
+			],
+			[
+				"dg_",
+				"dg_cmd"
+			],
+			[
+				"S",
+				"SEM_WAIT_FOR_SERVER"
+			],
+			[
+				"WA",
+				"SEM_WAIT_FOR_SERVER"
+			],
+			[
+				"dg",
+				"dg_cmd"
+			],
+			[
+				"shmem_",
+				"shmem_destroy"
+			],
+			[
+				"al",
+				"alloc"
+			],
+			[
+				"SEM",
+				"SEM_WAIT_FOR_CLIENT"
+			],
+			[
+				"WAI",
+				"SEM_WAIT_FOR_SERVER"
+			],
+			[
+				"shm",
+				"shmem_init"
+			],
+			[
+				"dg_s",
+				"dg_shmemkey	(database.h)"
+			],
+			[
+				"memc",
+				"memcpy"
+			],
+			[
+				"shmem_de",
+				"shmem_detach"
+			],
+			[
+				"SHM",
+				"SHMEM_SIZE"
+			],
+			[
+				"scree",
+				"screensaver_is_active"
+			],
+			[
+				"video_w",
+				"video_write_string"
+			],
+			[
+				"SYSCA",
+				"SYSCALL_SCREENSAVER_TIMER	(syscalls.h)"
+			],
+			[
+				"sys_set",
+				"sys_set_screensaver_timer	(syscalls.c)"
+			],
+			[
+				"video_up",
+				"video_update_screen_color"
+			],
+			[
+				"video_uo",
+				"video_update_screen_color"
+			],
+			[
+				"COLOR",
+				"COLOR_RED	(types.h)"
+			],
+			[
+				"video_tri",
+				"video_trigger_backup"
+			],
+			[
+				"video",
+				"video_write_line"
+			],
+			[
+				"colo",
+				"color"
+			],
+			[
+				"screen",
+				"screensaver_backup"
+			],
+			[
+				"video_write",
+				"video_write_nl"
+			],
+			[
+				"video_clear",
+				"video_clear_screen"
+			],
+			[
+				"video_rese",
+				"video_trigger_restore	(video.c)"
+			],
+			[
+				"video_tr",
+				"video_trigger_backup	(video.c)"
+			],
+			[
+				"SCR",
+				"SCREEN_HEIGHT"
+			],
+			[
+				"ui",
+				"uint64_t"
+			],
+			[
+				"vide",
+				"video_write_line"
+			],
+			[
+				"SC",
+				"SCREEN_START"
+			],
+			[
+				"video_get_",
+				"video_get_full_char_at"
+			],
+			[
+				"set",
+				"set_color"
+			],
+			[
+				"KE",
+				"KEYBOARD_LATAM"
+			],
+			[
+				"FD_",
+				"FD_STDERR"
+			],
+			[
+				"keyboard_dis",
+				"keyboard_distribution"
+			],
+			[
+				"keyboard_di",
+				"keyboard_distrib"
+			],
+			[
+				"KEY",
+				"KEYBOARD_USA"
+			],
+			[
+				"video_get",
+				"video_get_fg"
+			],
+			[
+				"syscal",
+				"syscall"
+			],
+			[
+				"sys_ke",
+				"sys_keyboard_replace_buffer"
+			],
+			[
+				"keyboard_repl",
+				"keyboard_replace_last_written"
+			],
+			[
+				"key",
+				"keyboard_wpos"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "ipc/shmem.c",
+			"settings":
+			{
+				"buffer_size": 6877,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server/server.c",
+			"settings":
+			{
+				"buffer_size": 3060,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "ipc/fifo.c",
+			"settings":
+			{
+				"buffer_size": 6778,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/sebikul/Downloads/forge-1.8-11.14.3.1450-src/src/main/resources/fireBlock.json",
+			"settings":
+			{
+				"buffer_size": 420,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "Package Control Messages\n========================\n\nPackage Control:\n---------------\n\n  Version 3.1 Release Notes\n  \n  Package Control continues its focus on polish and fixing edge-case bugs. Some\n  of the changes in this version include:\n  \n   - quick panel for Install Package now stays open on Windows with recent\n     versions of ST3, even when focus is lost\n   - new \"downloader_precedence\" setting to allow users to use specific HTTP\n     backend due to network proxy or SSL issues\n   - added Install Local Dependency command for package developers to more\n     easily deal with dependencies during development\n   - improved handling of git/hg package upgrade errors\n   - better handling of locked .sublime-package files on Windows\n   - performance improvements for users with a large number of open windows\n  \n  For package developers, the list of available dependencies has been growing:\n  https://github.com/wbond/package_control_channel/blob/master/repository/dependencies.json\n  \n  Enjoy!\n  \n  ",
+			"settings":
+			{
+				"buffer_size": 1004,
+				"line_ending": "Unix",
+				"name": "Package Control Messages",
+				"scratch": true
+			}
+		},
+		{
+			"file": "include/database.h",
+			"settings":
+			{
+				"buffer_size": 2787,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/Makefile/Make.sublime-build",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/Makefile/Make.sublime-build",
+					""
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					"Clean"
+				]
+			],
+			[
+				"Packages/Makefile/Make.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 167.0,
+		"last_filter": "form",
+		"selected_items":
+		[
+			[
+				"form",
+				"SublimeAStyleFormatter: Format Current File"
+			],
+			[
+				"set syntac ",
+				"Set Syntax: C"
+			],
+			[
+				"bea",
+				"Set Syntax: LaTeX Beamer"
+			],
+			[
+				"beaut",
+				"SublimeAStyleFormatter: Format Current File"
+			],
+			[
+				"git add",
+				"Git: Add Current File"
+			],
+			[
+				"git statu",
+				"Git: Status"
+			],
+			[
+				"git diff",
+				"Git: Diff"
+			],
+			[
+				"git comm",
+				"Git: Commit"
+			],
+			[
+				"beautif",
+				"SublimeAStyleFormatter: Format Current File"
+			],
+			[
+				"beau",
+				"SublimeAStyleFormatter: Format Current File"
+			],
+			[
+				"git log",
+				"Git: Log"
+			],
+			[
+				"git dif",
+				"Git: Diff Current File"
+			],
+			[
+				"lis",
+				"Package Control: List Packages"
+			],
+			[
+				"packa",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"list",
+				"Package Control: List Packages"
+			],
+			[
+				"beayt",
+				"SublimeAStyleFormatter: Format Current File"
+			],
+			[
+				"git",
+				"Gitk"
+			],
+			[
+				"pup",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"pin",
+				"Package Control: Install Package"
+			],
+			[
+				"sub for",
+				"SublimeAStyleFormatter: Format Current File"
+			],
+			[
+				"pins",
+				"Package Control: Install Package"
+			],
+			[
+				"gstash",
+				"Git: Stash"
+			],
+			[
+				"gstat",
+				"Git: Status"
+			],
+			[
+				"git:",
+				"SublimeGit: Documentation"
+			],
+			[
+				"pac	in",
+				"Package Control: Install Package"
+			],
+			[
+				"pac",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 467.0,
+		"history":
+		[
+			"source set-variables.sh macos",
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/sebikul/Proyectos/so-wannaflight",
+		"/Users/sebikul/Proyectos/so-wannaflight/client",
+		"/Users/sebikul/Proyectos/so-wannaflight/include",
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc",
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc/lib",
+		"/Users/sebikul/Proyectos/so-wannaflight/server",
+		"/Users/sebikul/Proyectos/so-wannaflight/server/db",
+		"/Users/sebikul/Proyectos/so-wannaflight/server/sqlite3"
+	],
+	"file_history":
+	[
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc/lib/semaphore.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc/msgqueue.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc/socket.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/client/client.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/server/Makefile",
+		"/Users/sebikul/Proyectos/so-wannaflight/client/Makefile",
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc/fifo.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/include/ipc.h",
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc/shmem.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/include/database.h",
+		"/Users/sebikul/Proyectos/so-wannaflight/server/db/database.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/Makefile",
+		"/Users/sebikul/Proyectos/so-wannaflight/ipc/filesig.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/include/semaphore.h",
+		"/Users/sebikul/Proyectos/so-wannaflight/server/server.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/include/config.h",
+		"/Users/sebikul/Library/Application Support/Sublime Text 3/Packages/Default/Default (OSX).sublime-keymap",
+		"/Users/sebikul/Proyectos/so-wannaflight/tp1.sublime-project",
+		"/Users/sebikul/Proyectos/so-wannaflight/include/common.h",
+		"/Users/sebikul/Proyectos/so-wannaflight/server/sqlite3/Makefile",
+		"/Users/sebikul/Downloads/sqlite-amalgamation-3081101/sqlite3.h",
+		"/Users/sebikul/Downloads/sqlite-amalgamation-3081101/sqlite3.c",
+		"/Users/sebikul/Proyectos/so-wannaflight/sqlite/Makefile",
+		"/Users/sebikul/Proyectos/so-wannaflight/server/shmem.c",
+		"/Users/sebikul/Downloads/history/-•-_jxKIlF8/IM_​Discusión general.csv",
+		"/Users/sebikul/Downloads/history/-•-_jxKIlF8/IM_​Discusión general.OLD",
+		"/Users/sebikul/Downloads/history/269399E3.csv",
+		"/Users/sebikul/Downloads/history/26761D59.csv",
+		"/Users/sebikul/Downloads/pkgbuild-introspection-master/mksrcinfo",
+		"/Users/sebikul/Downloads/nuevotpeso.zipo/defs.h",
+		"/Users/sebikul/Downloads/nuevotpeso.zipo/kernel.c",
+		"/Users/sebikul/Downloads/nuevotpeso.zipo/process.c",
+		"/Users/sebikul/Downloads/nuevotpeso.zipo/malloc.c",
+		"/Users/sebikul/Downloads/nuevotpeso.zipo/shell.c",
+		"/Users/sebikul/Downloads/forge-1.8-11.14.3.1450-src/gradlew",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Stable/gambas3-stable-wily/control",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Stable/gambas3-stable-vivid/control",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Stable/gambas3-stable-trusty/control",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Stable/gambas3-stable-precise/control",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Daily/gambas3-daily-wily/control",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Daily/gambas3-daily-vivid/control",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Daily/gambas3-daily-trusty/control",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Daily/gambas3-daily-precise/control",
+		"/Volumes/NetNFS/Peliculas/Whiplash.2014.1080p.BluRay.x264-SPARKS[rarbg]/RARBG.com.txt",
+		"/Users/sebikul/Downloads/wallet.aes.json",
+		"/Users/sebikul/Downloads/debian/control",
+		"/Users/sebikul/upnp",
+		"/Users/sebikul/Downloads/anti-adblock-killer.user.js",
+		"/Users/sebikul/Downloads/source/assets/www/coming-eb3de9d5.js",
+		"/Users/sebikul/Downloads/source/assets/www/consulta-01fb2d70.js",
+		"/Users/sebikul/Downloads/source/assets/www/cordova.js",
+		"/Users/sebikul/Downloads/source/assets/www/index.html",
+		"/Users/sebikul/Downloads/source/smali/ar/gov/pjn/electoral/padron/MainActivity.smali",
+		"/Users/sebikul/Downloads/source/src/ar/gov/pjn/electoral/padron/R.java",
+		"/Users/sebikul/Downloads/source/src/ar/gov/pjn/electoral/padron/MainActivity.java",
+		"/var/folders/y2/hq_kkrb13qscv5_tb4plnlz00000gn/T/bzr_log.QUhKge",
+		"/Users/sebikul/Proyectos/Mundus/mundus/modules/Desura.mundus",
+		"/Users/sebikul/Proyectos/Mundus/mundus/modules/Bitcoin.mundus",
+		"/Users/sebikul/Proyectos/Mundus/mundus/modules/Google Chrome.mundus",
+		"/Users/sebikul/Proyectos/Mundus/mundus/.git/MERGE_MSG",
+		"/Users/sebikul/Proyectos/Mundus/mundus/debian/rules",
+		"/Users/sebikul/Proyectos/CMundus/modules/Google Chrome.mundus",
+		"/Users/sebikul/Proyectos/CMundus/modules/Bazaar.mundus",
+		"/Users/sebikul/Proyectos/CMundus/dist/update_schema_0_to_1.py",
+		"/Users/sebikul/Proyectos/CMundus/modules/untitled",
+		"/Users/sebikul/Proyectos/CMundus/modules/Avidemux.mundus",
+		"/Users/sebikul/Proyectos/Gambas PPAs/Stable/gambas3-stable-utopic/control",
+		"/Users/sebikul/Library/Application Support/Google/Chrome/Default/Extensions/mfaihdlpglflfgpfjcifdjdjcckigekc/43.4410.349.18_0/main.js",
+		"/private/etc/hosts",
+		"/etc/hosts",
+		"/Volumes/Share/Peliculas/Blackhat.2015.1080p.WEB-DL.LINE.AAC2.0.H264-RARBG/Blackhat.2015.1080p.WEB-DL.LINE.AAC2.0.H264-RARBG.srt",
+		"/Users/sebikul/Downloads/app/msa/datos_json/demo_caba_generales_2015/CABA/Listas.json",
+		"/Users/sebikul/Downloads/app/msa/datos_json/demo_caba_generales_2015/CABA/Partidos.json",
+		"/Users/sebikul/Downloads/app/msa/datos_json/demo_caba_generales_2015/CABA/Boletas.json",
+		"/Users/sebikul/Downloads/app/msa/datos_json/demo_caba_generales_2015/Ubicaciones.json",
+		"/Users/sebikul/Downloads/app/msa/datos_json/demo_caba_generales_2015/TemplatesImpresion.json",
+		"/Users/sebikul/Downloads/app/msa/datos_json/demo_caba_generales_2015/Configuraciones.json",
+		"/Users/sebikul/Downloads/app/AUTHORS",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/HCI/hci-2015-01/website/js/orden.js",
+		"/Users/sebikul/AndroidStudioProjects/Define/.git/COMMIT_EDITMSG",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/HCI/hci-2015-01/website/js/compra.js",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/EDA/fuga-del-rey-reloaded/src/models/Game.java",
+		"/Users/sebikul/Downloads/Durango-snowbros/app/src/main/AndroidManifest.xml",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/.git/TAG_EDITMSG",
+		"/Users/sebikul/AndroidStudioProjects/Define/gradlew.bat",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands/time.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/syscalls/syscalls.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/headers/syscalls.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/drivers/keyboard.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/.git/COMMIT_EDITMSG",
+		"/Users/sebikul/.zshrc",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/shellModule.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/kernel.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/syscalls.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands/screensaver.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/drivers/video.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/include/video.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands/login.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands/echo.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands/color.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands/help.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/loader.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/include/keyboard.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/TODO",
+		"/Users/sebikul/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/libc/libc.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands/keyboard.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/drivers/rtc.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/include/rtc.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/run.sh",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/libc/include/libc.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/headers/types.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/commands.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/lib.c",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/Makefile",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/libc/lib/.gitignore",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/syscalls/lib/.gitignore",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/sysvar.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/interrupt.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/syscalls.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/init/smp.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/init/pic.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/init/cpu.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/init/acpi.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/init/isa.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Bootloader/Pure64/src/init/smp_ap.asm",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Kernel/include/lib.h",
+		"/Users/sebikul/Proyectos del Colegio/ITBA/Arqui/tp-arqui/Userland/ShellModule/time.c"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"mbe01_block_simple_face",
+			"mbe01_block_simple_face0",
+			"minecraftbyexample",
+			"shmem_init",
+			"shmem_init_with_key",
+			"ftok",
+			"shmem_init_with_key",
+			"realloc",
+			"clientid",
+			"filesig",
+			"socket",
+			"INT",
+			");\n",
+			"add_flight",
+			"OP_CMD",
+			"}\n",
+			"DUMP_ARGS",
+			"->",
+			"SEM_UNDO",
+			"strlen",
+			"realloc",
+			"OP_CMD",
+			"DATAGRAM_MAXSIZE",
+			"ARGC",
+			"argc",
+			"DUMP_RESULT_DATAGRAM",
+			"DATAGRAM",
+			"datagram",
+			"_w",
+			"dg",
+			"shmem.",
+			"_w",
+			"flight_id",
+			"ftime",
+			"sql",
+			"\\t",
+			"__",
+			"->",
+			"                          ",
+			"                         ",
+			"                        ",
+			"                       ",
+			"                      ",
+			"                     ",
+			"                    ",
+			"                   ",
+			"                  ",
+			"                 ",
+			"                ",
+			"               ",
+			"              ",
+			"             ",
+			"err_msg",
+			"semget",
+			"cli_count",
+			"sem_queue_init",
+			"sem_init",
+			"sem_init_with_key",
+			"CONFIG",
+			"{",
+			"static",
+			"exit",
+			"n",
+			"datagram",
+			"newpath",
+			"r",
+			"buf",
+			"socket",
+			"cli_count",
+			"clientfd",
+			"shmem_init_with_key",
+			">\n",
+			"sem_queue",
+			"SEM_QUEUE",
+			"sem_queue",
+			"SEM_QUEUE",
+			"dump",
+			"clientid",
+			"read",
+			"socket_desc",
+			"listenfd",
+			"SRVPRINT",
+			"socketfd",
+			"sock",
+			"    ",
+			"dg_cmd",
+			"SERVPRINT",
+			"CLIPRINT",
+			"SERVPRINT",
+			"SERVPRINTE",
+			"cli_count",
+			"sem_init()",
+			"shmem_init()",
+			"shmem_init",
+			"cli_count",
+			"queue",
+			"sem_down",
+			"sem_up",
+			"SEM_WAIT_FOR_CLIENT",
+			"SEM_WAIT_FOR_SERVER",
+			"initdg",
+			"init",
+			"SEM_KEY",
+			"SEM_CLI_WAIT",
+			"SEM_SRV_WAIT",
+			"server",
+			" .",
+			"semid",
+			"memid",
+			" ",
+			"curl",
+			"eval",
+			"dbus",
+			"gtk3",
+			"report",
+			"opengl",
+			"media-form",
+			"gb-map",
+			"-gui-base",
+			"-gui",
+			"gui",
+			"gtk3",
+			"desktop",
+			"desktop-gnome",
+			"desktop",
+			"form-editor",
+			"compress",
+			"chart"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"\\t",
+			"",
+			"#"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "ipc/shmem.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6877,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								873,
+								873
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C Improved/C Improved.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 2.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "server/server.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3060,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								258,
+								258
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C Improved/C Improved.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "ipc/fifo.c",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 6778,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C Improved/C Improved.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/Users/sebikul/Downloads/forge-1.8-11.14.3.1450-src/src/main/resources/fireBlock.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 420,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								412,
+								412
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1004,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1004,
+								1004
+							]
+						],
+						"settings":
+						{
+							"auto_indent": false,
+							"default_dir": "/Users/sebikul/Proyectos/so-wannaflight",
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "include/database.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2787,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2262,
+								2262
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C Improved/C Improved.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 788.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.astyle_error_message":
+	{
+		"height": 0.0
+	},
+	"output.exec":
+	{
+		"height": 162.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.git-commit":
+	{
+		"height": 100.0
+	},
+	"pinned_build_system": "Packages/Makefile/Make.sublime-build",
+	"project": "tp1.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 209.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

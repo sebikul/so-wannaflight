@@ -7,8 +7,7 @@
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
-
-#define BUFFER_SIZE 50
+#include "libserver.h"
 
 int cli_count = 0;
 
@@ -39,85 +38,22 @@ void serve() {
 		DB_DATAGRAM* datagram, *ans;
 
 		datagram = ipc_receive(session);
-		//DUMP_DATAGRAM(datagram);
 
-		switch (datagram->opcode) {
-
-		case OP_EXIT:
-
+		if (datagram->opcode == OP_EXIT) {
+			
 			CLIPRINTE("Comando de salida recibido!\n");
-
 			free(datagram);
-
 			ipc_disconnect(session);
 
 			//FIXME: Deberia liberar los recursos, pero no liberar el semaforo de cola
 			//ipc_free(session);
 
 			exit(0);
-			break;
-
-		case OP_CONSULT:
-			ans = db_consult_flights(datagram->dg_origin, datagram->dg_destination);
-			break;
-
-		case OP_PURCHASE:
-
-			ans = malloc(sizeof(DB_DATAGRAM));
-			ans->size = sizeof(DB_DATAGRAM);
-			ans->opcode = OP_PURCHASE;
-			ans->dg_seat = db_purchase(datagram->dg_flightid);
-			break;
-
-		case OP_CANCEL:
-
-			ans = malloc(sizeof(DB_DATAGRAM));
-			ans->size = sizeof(DB_DATAGRAM);
-			ans->opcode = OP_CANCEL;
-
-			ans->dg_result = db_cancel(datagram->dg_seat);
-			break;
-
-		case OP_PING: {
-
-			int size = sizeof(DB_DATAGRAM) + strlen(datagram->dg_cmd) + 1;
-
-			ans = malloc(size);
-			ans->size = size;
-			ans->opcode = OP_PONG;
-			strcpy(ans->dg_cmd, datagram->dg_cmd);
-			break;
 		}
 
-		case OP_ADDFLIGHT: {
-
-			DB_ENTRY entry = datagram->dg_results[0];
-
-			ans = malloc(sizeof(DB_DATAGRAM));
-			ans->size = sizeof(DB_DATAGRAM);
-			ans->opcode = OP_ADDFLIGHT;
-
-			ans->dg_flightid = db_add_flight(entry.departure, entry.origin, entry.destination);
-
-			break;
-
-		}
-
-		default:
-			free(datagram);
-
-			printf("Comando invalido.\n");
-
-			continue;
-		}
-
-#ifdef MSGQUEUE
-		ans->sender = datagram->sender;
-#endif
-
+		ans = execute_datagram(datagram);
 		free(datagram);
 
-		//DUMP_DATAGRAM(datagram);
 		ipc_send(session, ans);
 
 		free(ans);
