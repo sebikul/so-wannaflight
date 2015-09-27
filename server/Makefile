@@ -29,3 +29,4 @@ clean:
 	cd sqlite3; make clean
 	rm -f *.o
 	rm -rf server-*
+	rm -f files/*
