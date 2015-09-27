@@ -12,12 +12,11 @@
 #include "filemutex.h"
 
 int is_admin = 0;
-
+static fmutex_t mutex;
 
 void int_handler(int s) {
-	printf("Limpiando antes de desconectar.\n");
 
-	//clear_locks();
+	fmutex_free(mutex);
 
 	exit(0);
 }
@@ -29,18 +28,7 @@ int main(int argc, char* argv[]) {
 	system("clear");
 	printf("Iniciando cliente...\n");
 
-	fmutex_t mutex = fmutex_new(LOCALCLIENT_MUTEX_PATH);
-
-	fmutex_enter(mutex);
-
-	printf("Archivo bloqueado. Presione enter para continuar.\n");
-	getchar();
-
-	fmutex_leave(mutex);
-	fmutex_free(mutex);
-
-	//lockdb();
-	exit(0);
+	mutex = fmutex_new(LOCALCLIENT_MUTEX_PATH);
 
 	db_open(DB_PATH);
 
@@ -59,8 +47,6 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (strcmp(buffer, "exit") == 0) {
-			//TODO limpiar blocks
-			//clear_locks();
 			break;
 		} else {
 
@@ -71,9 +57,11 @@ int main(int argc, char* argv[]) {
 				continue;
 			}
 
+			fmutex_enter(mutex);
 			ans = execute_datagram(datagram);
-			free(datagram);
+			fmutex_leave(mutex);
 
+			free(datagram);
 			parse_answer(ans);
 			free(ans);
 
@@ -81,6 +69,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	fmutex_free(mutex);
 
 	return 0;
 }

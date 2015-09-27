@@ -33,13 +33,13 @@ void fmutex_enter(fmutex_t mutex) {
 	chmod(mutex->path, S_IWUSR);
 	mutex->fd = open(mutex->path, O_CREAT | O_WRONLY);
 
-	printf("Opening %s, fd: %d, errno: %d\n", mutex->path, mutex->fd, errno);
+	//printf("Opening %s, fd: %d, errno: %d\n", mutex->path, mutex->fd, errno);
 
 	memset(&lock, 0, sizeof(struct flock));
 	lock.l_type = F_WRLCK;
 	lock.l_whence = SEEK_SET;
 
-	printf("Locking file: %s\n", mutex->path);
+	//printf("Locking file: %s\n", mutex->path);
 
 	code = fcntl(mutex->fd, F_SETLKW, &lock);
 }
@@ -49,14 +49,14 @@ void fmutex_leave(fmutex_t mutex) {
 	struct flock lock;
 
 	if (mutex->fd == -2) {
-		printf("Mutex no inicializado!\n");
+		printf("[ERROR] Mutex no inicializado! %s\n", mutex->path);
 	}
 
 	memset(&lock, 0, sizeof(struct flock));
 	lock.l_type = F_UNLCK;
 	lock.l_whence = SEEK_SET;
 
-	printf("Unlocking file: %s\n", mutex->path);
+	//printf("Unlocking file: %s\n", mutex->path);
 	fcntl(mutex->fd, F_SETLK, &lock);
 	close(mutex->fd);
 }

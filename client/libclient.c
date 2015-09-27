@@ -216,6 +216,19 @@ DB_DATAGRAM* command_to_datagram(char* command) {
 
 		datagram->dg_seat = atoi(cmd.argv[1]);
 
+	} else if (strcmp(cmd.argv[0], "help") == 0) {
+
+
+		printf("Comandos disponibles:\n");
+		printf("\t ping [...]: \tEnvia una cadena de texto al servidor, y éste responde con la misma cadena.\n");
+		printf("\t consult [from <origen>] [to <destino>]: \tConsulta la disponibilidad de vuelos. El orden de los argumentos es intercambiable. Sin argumentos imprime toda la lista de vuelos.\n");
+		printf("\t purchase <flightid>: \tCompra un pasaje para el vuelo ingresado.\n");
+		printf("\t cancel <purchaseid>: \tCancela el pasaje ingresado.\n");
+		printf("\t exit: \tSale del cliente.\n");
+
+		printf("\t makeadmin: \tDa privilegios de escritura al usuario.\n");
+		printf("\t addflight <origen> <destino> \"dd-mm-YYYY HH:MM:SS\": \tAgrega un vuelo a la base de datos\n");
+
 	} else  if (is_admin && strcmp(cmd.argv[0], "addflight") == 0) {
 
 		struct tm departure;

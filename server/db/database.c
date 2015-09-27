@@ -225,7 +225,7 @@ DB_DATAGRAM* db_consult_flights(airport_id origin, airport_id destination) {
         entry.origin = sqlite3_column_int(statement, DB_COL_ORIGIN);
         entry.destination = sqlite3_column_int(statement, DB_COL_DESTINATION);
 
-        printf("Adding flight %d to result.\n", entry.id);
+        //printf("Adding flight %d to result.\n", entry.id);
 
         memcpy(&datagram->dg_results[rowcount], &entry, sizeof(DB_ENTRY));
 
