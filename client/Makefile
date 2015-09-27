@@ -21,7 +21,7 @@ msgqueue:
 	gcc $(GCCFLAGS) $(SOURCES) -DMSGQUEUE  -o client-msgqueue ../ipc/msgqueue.c
 
 localclient: sqlite3
-	gcc $(GCCFLAGS) -I../server localclient.c libclient.c ../server/{libserver.c,db/database.c,sqlite3/sqlite3.o}  -o localclient 
+	gcc $(GCCFLAGS) -I../server localclient.c libclient.c  ../ipc/lib/filemutex.c ../server/{libserver.c,db/database.c,sqlite3/sqlite3.o}  -o localclient 
 
 sqlite3:
 	cd ../server/sqlite3; make all
