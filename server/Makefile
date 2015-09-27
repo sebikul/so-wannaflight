@@ -20,7 +20,7 @@ fifo: sqlite3
 	gcc $(GCCFLAGS) -DFIFO -o server-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
 
 filesig: sqlite3
-	gcc $(GCCFLAGS) -DFILESIG -o server-filesig ../ipc/filesig.c
+	gcc $(GCCFLAGS) -DFILESIG -o server-filesig ../ipc/filesig.c ../ipc/lib/semaphore.c
 
 msgqueue:
 	gcc $(GCCFLAGS) -DMSGQUEUE -o server-msgqueue ../ipc/msgqueue.c
