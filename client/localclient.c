@@ -13,6 +13,7 @@
 
 int is_admin = 0;
 static fmutex_t mutex;
+static int delay = 0;
 
 void int_handler(int s) {
 
@@ -48,17 +49,37 @@ int main(int argc, char* argv[]) {
 
 		if (strcmp(buffer, "exit") == 0) {
 			break;
+		} else if (strncmp(buffer, "setdelay", 8) == 0) {
+
+			struct shell_cmd cmd = parse_command(buffer);
+
+			if (cmd.argc != 2) {
+				printf("Comando invalido.\n");
+			}
+
+			delay = atoi(cmd.argv[1]);
+			printf("Retardo seteado en %d segundos\n", delay);
+			
+			FREE_ARGV(cmd);
+			print_prompt();
+
 		} else {
 
 			DB_DATAGRAM* datagram = command_to_datagram(buffer);
 			DB_DATAGRAM* ans;
 
 			if (datagram == NULL) {
+				print_prompt();
 				continue;
 			}
 
 			fmutex_enter(mutex);
 			ans = execute_datagram(datagram);
+
+			if (delay > 0) {
+				sleep(delay);
+			}
+
 			fmutex_leave(mutex);
 
 			free(datagram);
