@@ -95,7 +95,7 @@ typedef struct {
 
 #define DUMP_RESULT_DATAGRAM(datagram)	{\
 											int i;\
-											for(int i = 0; i < datagram->dg_count; i++){\
+											for(i = 0; i < datagram->dg_count; i++){\
 												DUMP_DBENTRY(datagram->dg_results[i]);\
 											}\
 										}
