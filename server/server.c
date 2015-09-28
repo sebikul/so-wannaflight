@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
@@ -16,7 +17,6 @@ static void close_conn() {
 	ipc_free(session);
 	db_close();
 	exit(0);
-
 }
 
 void int_handler(int s) {
@@ -28,6 +28,8 @@ void int_handler(int s) {
 
 	} else if (s == SIGCHLD) {
 		int status;
+
+		//Vamos a consumir los procesos hijos para que no queden zombies en el sistema
 		printf("Proceso hijo terminado.");
 		waitpid(-1, &status, 0);
 		printf(" status: %d\n", status);
@@ -74,7 +76,7 @@ int main(int argc, char** argv) {
 	printf("Starting server...\n");
 
 	signal(SIGINT, int_handler);
-	signal(SIGCHLD, int_handler);
+	//signal(SIGCHLD, int_handler);
 
 #ifdef FIFO
 	signal(SIGPIPE, sigpipe_handler);

@@ -94,7 +94,7 @@ void sem_up(int semid, int semnum) {
 
 	sb.sem_num = semnum;
 	sb.sem_op = 1;
-//	sb.sem_flg = SEM_UNDO; FUCK YOU UNDO!
+//	sb.sem_flg = SEM_UNDO;// FUCK YOU UNDO!
 	semop(semid, &sb, 1);
 }
 
