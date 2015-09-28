@@ -7,7 +7,7 @@
 #include <signal.h>
 
 #include "config.h"
-#include "ipc.h"`
+#include "ipc.h"
 #include "database.h"
 #include "libclient.h"
 
