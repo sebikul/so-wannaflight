@@ -6,16 +6,14 @@
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
-#include "semaphore.h"
 
 struct session_t {
-  int semid;
   FILE *fp;
   char *filename;
 };
 
 static struct sigaction sig;
-
+int waiting = 0;
 
 char* get_file_name(int pid){
   char aux[16];
@@ -32,8 +30,10 @@ ipc_session ipc_newsession() {
 }
 
 
-void sig_usr1_handler(int s){
-  sem_up(session->semid, SEM_SERVER);
+void request_received(int s){
+  if(sig == SIGUSR1){
+    waiting = 0;
+  }
 }
 
 
@@ -42,13 +42,9 @@ int ipc_listen(ipc_session session, int argc, char** args) {
   session->filename = get_file_name(getpid());
   session->fp = fopen(session->filename, "wb");
 
-  sigemptyset(&sig.sa_mask);
-  sig.sa_flags = 0;
-  sig.sa_handler = sig_usr1_handler;
-  sigaction(SIGUSR1, &sig, NULL);
+  signal(SIGUSR1, request_received);
 
-  sem_init(&session->semid, 1);
-  sem_set(session->semid, SEM_SERVER, 0);
+  waiting = 1;
 
   SRVPRINTE("Escuchando clientes...\n");
   return 0;
@@ -56,14 +52,17 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 
 
 void ipc_accept(ipc_session session) {
-  sem_down(session->semid, SEM_SERVER);
+  while(waiting){
+    pause();
+  }
+  waiting = 1;
+  signal(SIGUSR1, request_received);
   SRVPRINTE("Cliente conectado...\n");
 }
 
 
 void ipc_sync(ipc_session session) {
-  sem_init(&session->semid, 1);
-  sem_set(session->semid, SEM_SERVER, 0);
+  
 }
 
 

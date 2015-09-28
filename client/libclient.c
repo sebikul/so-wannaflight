@@ -233,15 +233,12 @@ DB_DATAGRAM* command_to_datagram(char* command) {
 
 		struct tm departure;
 		char timebuf[32];
-		DB_ENTRY entry;
 
 		CHECK_ARGC(cmd.argc, 4);
 
 		datagram = (DB_DATAGRAM*) malloc(sizeof(DB_DATAGRAM));
 		datagram->size = sizeof(DB_DATAGRAM);
 		datagram->opcode = OP_ADDFLIGHT;
-
-		entry = datagram->dg_results[0];
 
 		datagram->dg_results[0].origin = atoi(cmd.argv[1]);
 		datagram->dg_results[0].destination = atoi(cmd.argv[2]);
