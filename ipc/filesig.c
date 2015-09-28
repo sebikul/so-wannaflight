@@ -2,14 +2,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include "config.h"
 #include "database.h"
 #include "ipc.h"
+#include "semaphore.h"
 
 struct session_t {
   FILE *fp;
   char *filename;
 };
+
+static struct sigaction sig;
 
 
 char* get_file_name(int pid){
@@ -31,14 +35,19 @@ int ipc_listen(ipc_session session, int argc, char** args) {
   SRVPRINTE("Inicializando IPC de archivos y señales...\n");
   session->filename = get_file_name(getpid());
   session->fp = fopen(session->filename, "wb");
-  // TODO
+
+  sigemptyset(&sig.sa_mask);
+  sig.sa_flags = 0;
+  sig.sa_handler = sig_usr1_handler;
+  sigaction(SIGUSR1, &sig, NULL);
+
   SRVPRINTE("Escuchando clientes...\n");
   return 0;
 }
 
 
 void ipc_accept(ipc_session session) {
-  // TODO
+  while(1);
   SRVPRINTE("Cliente conectado...\n");
 }
 
@@ -63,21 +72,11 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
     return -1;
   }
   memcpy(session->fp, data, data->size);
-  #ifdef SERVER
-    sem_up(session->semid, SEM_SERVER);
-  #else
-    sem_up(session->semid, SEM_CLIENT);
-  #endif
   return 0;
 }
 
 
 DB_DATAGRAM* ipc_receive(ipc_session session) {
-  #ifdef SERVER
-   sem_down(session->semid, SEM_CLIENT);
-  #else
-   sem_down(session->semid, SEM_SERVER);
-  #endif
    DB_DATAGRAM *datagram, *new_datagram;
    datagram = (DB_DATAGRAM*)session->fp;
    new_datagram = (DB_DATAGRAM*)malloc(datagram->size);
