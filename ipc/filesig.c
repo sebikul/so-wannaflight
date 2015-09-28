@@ -160,7 +160,7 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
   if (data->size > SHMEM_SIZE) {
     return -1;
   }
-  memcpy(session->alloc, data, data->size);
+  memcpy(session->fp, data, data->size);
   #ifdef SERVER
     sem_up(session->semid, SEM_SERVER);
   #else
