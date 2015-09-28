@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
 		} else {
 			DB_DATAGRAM *datagram = command_to_datagram(buffer);
 			if (datagram == NULL) {
+				print_prompt();
 				continue;
 			}
 			ipc_send(session, datagram);
