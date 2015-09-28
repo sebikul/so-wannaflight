@@ -11,3 +11,5 @@ server/server-*.*/*
 
 *.o
 server/.gdb_history
+
+server/files/*
