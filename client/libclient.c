@@ -230,6 +230,10 @@ DB_DATAGRAM* command_to_datagram(char* command) {
 		printf("\t makeadmin: \tDa privilegios de escritura al usuario.\n");
 		printf("\t addflight <origen> <destino> \"dd-mm-YYYY HH:MM:SS\": \tAgrega un vuelo a la base de datos\n");
 
+#ifdef LOCALCLIENT
+		printf("\t setdelay <delay>: \tSetea un delay arbitrario para poder probar las funciones de exclusion mutua.\n");
+#endif
+
 		return NULL;
 
 	} else  if (is_admin && strcmp(cmd.argv[0], "addflight") == 0) {
