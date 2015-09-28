@@ -63,8 +63,11 @@ void serve() {
 
 		ans = execute_datagram(datagram);
 		free(datagram);
-		ipc_send(session, ans);
-		free(ans);
+
+		if(ans!=NULL){
+			ipc_send(session, ans);
+			free(ans);
+		}
 	}
 }
 

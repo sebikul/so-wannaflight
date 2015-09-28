@@ -125,7 +125,6 @@ void ipc_sync(ipc_session session) {
 	DB_DATAGRAM* datagram;
 	int size;
 	int newfd;
-	char pid[10];
 
 	sprintf(newpath, "%s-%d", FILES_INITIAL_PATH, cli_count);
 	printf("Creando nuevo archivo de comunicacion: %s\n", newpath);
