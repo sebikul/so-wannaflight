@@ -285,10 +285,6 @@ void ipc_disconnect(ipc_session session) {
 
 	unlink(session->path_r);
 	unlink(session->path_w);
-
-	free(session->path_r);
-	free(session->path_w);
-
 }
 
 void ipc_free(ipc_session session) {
@@ -296,6 +292,9 @@ void ipc_free(ipc_session session) {
 #ifdef SERVER
 	sem_queue_destroy(session->queueid);
 #endif
+
+	free(session->path_r);
+	free(session->path_w);
 
 	free(session);
 }
