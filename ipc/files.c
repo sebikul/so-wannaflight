@@ -322,7 +322,7 @@ void ipc_disconnect(ipc_session session) {
 	close(session->serverfd);
 
 #ifdef SERVER
-	//unlink(session->path);
+	unlink(session->path);
 #endif
 }
 
