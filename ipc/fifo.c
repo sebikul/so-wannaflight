@@ -15,7 +15,10 @@ struct session_t {
 	char* path_r;
 	char* path_w;
 
+	//Guarda el fifo de lectura del servidor / escritura del cliente
 	int serverfd_r;
+
+	//Guarda el fifo de escritura del servidor / lectura del cliente
 	int serverfd_w;
 
 	int queueid;
@@ -24,6 +27,13 @@ struct session_t {
 #ifdef SERVER
 extern int cli_count;
 #endif
+
+static void build_path(const char* path, char** dest) {
+
+	*dest = malloc(strlen(path) + 1);
+	strcpy(*dest, path);
+
+}
 
 static int file_exist(const char* path) {
 	return (access(path, 0) == 0);
@@ -64,11 +74,8 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 		fprintf(stderr, "Error al crear el FIFO en " FIFO_INITIAL_PATH "-w" "\n");
 	}
 
-	session->path_r = malloc(strlen(FIFO_INITIAL_PATH "-r") + 1);
-	strcpy(session->path_r, FIFO_INITIAL_PATH "-r");
-
-	session->path_w = malloc(strlen(FIFO_INITIAL_PATH "-w") + 1);
-	strcpy(session->path_w, FIFO_INITIAL_PATH "-w");
+	build_path(FIFO_INITIAL_PATH "-r", &session->path_r);
+	build_path(FIFO_INITIAL_PATH "-w", &session->path_w);
 
 	return 0;
 }
@@ -148,14 +155,12 @@ void ipc_sync(ipc_session session) {
 	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_w);
 	session->serverfd_w = open(newpath_w, O_WRONLY);
 	free(session->path_w);
-	session->path_w = malloc(strlen(newpath_w) + 1);
-	strcpy(session->path_w, newpath_w);
+	build_path(newpath_w, &session->path_w);
 
 	printf("Abriendo nuevo FIFO de lectura: %s\n", newpath_r);
 	session->serverfd_r = open(newpath_r, O_RDONLY);
 	free(session->path_r);
-	session->path_r = malloc(strlen(newpath_r) + 1);
-	strcpy(session->path_r, newpath_r);
+	build_path(newpath_r, &session->path_r);
 
 	datagram = ipc_receive(session);
 
@@ -215,16 +220,19 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	printf("Nuevo FIFO a usar: %s\n", datagram->dg_cmd);
 
 	sprintf(newpath_r, "%s-r", datagram->dg_cmd);
+	build_path(newpath_r, &session->path_r);
+
 	sprintf(newpath_w, "%s-w", datagram->dg_cmd);
+	build_path(newpath_w, &session->path_w);
 
 	close(session->serverfd_r);
 	close(session->serverfd_w);
 
-	printf("Abriendo nuevo FIFO de lectura: %s\n", newpath_w);
-	session->serverfd_w = open(newpath_w, O_RDONLY);
+	printf("Abriendo nuevo FIFO de lectura: %s\n", session->path_w);
+	session->serverfd_w = open(session->path_w, O_RDONLY);
 
-	printf("Abriendo nuevo FIFO de escritura: %s\n", newpath_r);
-	session->serverfd_r = open(newpath_r, O_WRONLY);
+	printf("Abriendo nuevo FIFO de escritura: %s\n", session->path_r);
+	session->serverfd_r = open(session->path_r, O_WRONLY);
 
 	datagram = realloc(datagram, sizeof(DB_DATAGRAM));
 	datagram->size = sizeof(DB_DATAGRAM);
@@ -277,6 +285,10 @@ void ipc_disconnect(ipc_session session) {
 
 	unlink(session->path_r);
 	unlink(session->path_w);
+
+	free(session->path_r);
+	free(session->path_w);
+
 }
 
 void ipc_free(ipc_session session) {
@@ -288,6 +300,6 @@ void ipc_free(ipc_session session) {
 	free(session);
 }
 
-bool ipc_shouldfork(){
+bool ipc_shouldfork() {
 	return TRUE;
 }
