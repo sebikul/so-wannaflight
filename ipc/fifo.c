@@ -103,6 +103,8 @@ void ipc_accept(ipc_session session) {
 	if (datagram->opcode != OP_CONNECT) {
 		CLIPRINTE("Error en el protocolo de sincronizacion.\n");
 		DUMP_DATAGRAM(datagram);
+		ipc_disconnect(session);
+		ipc_free(session);
 		exit(1);
 	}
 
@@ -175,6 +177,8 @@ void ipc_sync(ipc_session session) {
 	if (datagram->opcode != OP_CONNECT) {
 		CLIPRINTE("Error en el protocolo de sincronizacion 2.\n");
 		DUMP_DATAGRAM(datagram);
+		ipc_disconnect(session);
+		ipc_free(session);
 		exit(1);
 	}
 
@@ -278,6 +282,12 @@ DB_DATAGRAM* ipc_receive(ipc_session session) {
 #else
 	size = read(session->serverfd_w, datagram, DATAGRAM_MAXSIZE);
 #endif
+
+	if (size == -1) {
+		printf("Read error: %d\n", errno);
+		free(datagram);
+		return NULL;
+	}
 
 	datagram->size = size;
 
