@@ -1,9 +1,9 @@
 GCCFLAGS=-Wall -Wextra -pedantic -Wno-unused-parameter -g -DSERVER -pthread -ldl -I../include sqlite3/sqlite3.o server.c db/database.c libserver.c
 GCC=gcc-5
 
-.PHONY: all clean sqlite3 socket shmem fifo filesig msgqueue
+.PHONY: all clean sqlite3 socket shmem fifo files msgqueue
 
-all: shmem socket fifo filesig msgqueue
+all: shmem socket fifo files msgqueue
 
 run: clean server.o
 	./server
@@ -19,9 +19,6 @@ socket: sqlite3
 
 fifo: sqlite3
 	$(GCC) $(GCCFLAGS) -DFIFO -o server-fifo ../ipc/fifo.c  ../ipc/lib/semaphore.c
-
-filesig: sqlite3
-	$(GCC) $(GCCFLAGS) -DFILESIG -o server-filesig ../ipc/filesig.c ../ipc/lib/semaphore.c
 
 files: sqlite3
 	$(GCC) $(GCCFLAGS) -DFILES -o server-files ../ipc/files.c ../ipc/lib/semaphore.c

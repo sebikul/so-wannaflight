@@ -137,10 +137,6 @@ void ipc_sync(ipc_session session) {
 		exit(1);
 	}
 
-	// sprintf(pid, "%d", getpid());
-	// printf("Escribiendo nuevo pid del servidor: %s\n", pid);
-	// write(session->serverfd, pid, strlen(pid));
-
 	//A esta altura los archivos existen en el fs, pero nadie esta conectado. Falta mandarselos
 	//al cliente, y luego reemplazar los actuales para poder aceptar al proximo cliente.
 
@@ -228,8 +224,6 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	datagram->size = sizeof(DB_DATAGRAM);
 	datagram->dg_pid = getpid();
 
-	//DUMP_DATAGRAM(datagram);
-
 	//STEP-1
 	ipc_send(session, datagram);
 	free(datagram);
@@ -249,11 +243,6 @@ int ipc_connect(ipc_session session, int argc, char** args) {
 	build_path(datagram->dg_cmd, &session->path);
 	printf("Abriendo nuevo archivo de comunicacion: %s\n", session->path);
 	session->serverfd = open(session->path, O_RDWR);
-
-
-	// read(session->serverfd, pid, 10);
-	// printf("Guardado nuevo pid del servidor: %s\n", pid);
-	// session->otherpid = atoi(pid);
 
 	printf("Enviando ACK\n");
 	datagram = realloc(datagram, sizeof(DB_DATAGRAM));
@@ -278,10 +267,6 @@ int ipc_send(ipc_session session, DB_DATAGRAM* data) {
 	lseek(session->serverfd, 0, SEEK_SET);
 	write(session->serverfd, data, data->size);
 
-	//printf("Escribiendo datagrama en %s\n", session->path);
-	//Mandamos la señal para que se levante la otra parte.
-
-	//printf("Enviando señal al pid: %d\n", session->otherpid);
 	kill(session->otherpid, SIGUSR1);
 
 	return 0;
@@ -301,8 +286,6 @@ DB_DATAGRAM* ipc_receive(ipc_session session) {
 
 	lseek(session->serverfd, 0, SEEK_SET);
 	size = read(session->serverfd, datagram, DATAGRAM_MAXSIZE);
-
-	//printf("Leyendo datagrama de %s\n", session->path);
 
 	if (size == -1) {
 		printf("Read error: %d\n", errno);

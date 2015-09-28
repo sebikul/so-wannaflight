@@ -24,9 +24,9 @@ fifo:
 	cd server; make fifo
 	cd client; make fifo
 
-filesig:
-	cd server; make filesig
-	cd client; make filesig
+files:
+	cd server; make files
+	cd client; make files
 
 msgqueue:
 	cd server; make msgqueue
