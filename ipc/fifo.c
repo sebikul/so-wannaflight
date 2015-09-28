@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/file.h>
+#include <errno.h>
 
 #include "config.h"
 #include "database.h"
@@ -87,7 +88,14 @@ void ipc_accept(ipc_session session) {
 	printf("Esperando cliente...\n");
 
 	session->serverfd_r = open(FIFO_INITIAL_PATH "-r", O_RDONLY);
+	if (session->serverfd_r == -1) {
+		printf("errno_r: %d\n", errno);
+	}
+
 	session->serverfd_w = open(FIFO_INITIAL_PATH "-w", O_WRONLY);
+	if (session->serverfd_w == -1) {
+		printf("errno_r: %d\n", errno);
+	}
 
 	//Recibimos el pedido de conexion
 	datagram = ipc_receive(session);
