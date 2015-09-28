@@ -51,6 +51,7 @@ typedef struct {
 		int 		_shmemkey;
 		flight_id 	_flight_id;
 		int 		_origin;
+		int 		_pid;
 	} _data;
 
 	union {
@@ -67,6 +68,7 @@ typedef struct {
 #define dg_shmemkey 	_data._shmemkey
 #define dg_flightid		_data._flight_id
 #define dg_origin		_data._origin
+#define dg_pid			_data._pid
 
 #define dg_cmd			_raw_data._cmd
 #define dg_results		_raw_data._results
@@ -78,6 +80,8 @@ typedef struct {
 
 #ifdef MSGQUEUE
 #define DATAGRAM_PRINT(datagram) printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n\tsender: %d\n", datagram->size, datagram->opcode, datagram->sender);
+#elif FILES
+#define DATAGRAM_PRINT(datagram) printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n\tpid: %d\n", datagram->size, datagram->opcode, datagram->dg_pid);
 #else
 #define DATAGRAM_PRINT(datagram) printf("[DATAGRAM][\n\tTamaño: %zu\n\topcode: %d\n", datagram->size, datagram->opcode);
 #endif

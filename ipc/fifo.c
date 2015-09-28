@@ -67,12 +67,14 @@ int ipc_listen(ipc_session session, int argc, char** args) {
 
 	if ( !file_exist(FIFO_INITIAL_PATH "-r") && make_fifo(FIFO_INITIAL_PATH "-r") == -1 ) {
 		fprintf(stderr, "Error al crear el FIFO en " FIFO_INITIAL_PATH "-r" "\n");
+		return -1;
 	}
 
 	printf("Abriendo FIFO para escritura...\n");
 
 	if ( !file_exist(FIFO_INITIAL_PATH "-w") && make_fifo(FIFO_INITIAL_PATH "-w") == -1 ) {
 		fprintf(stderr, "Error al crear el FIFO en " FIFO_INITIAL_PATH "-w" "\n");
+		return -1;
 	}
 
 	build_path(FIFO_INITIAL_PATH "-r", &session->path_r);
@@ -301,8 +303,11 @@ void ipc_disconnect(ipc_session session) {
 	close(session->serverfd_w);
 	close(session->serverfd_r);
 
+#ifdef SERVER
 	unlink(session->path_r);
 	unlink(session->path_w);
+#endif
+
 }
 
 void ipc_free(ipc_session session) {
